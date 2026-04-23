@@ -1,0 +1,57 @@
+{
+  "run_id": "20260210_131553",
+  "timestamp": "2026-02-10T13:15:53.053589",
+  "steps": {
+    "s00_split_unified": {
+      "timestamp": "2026-02-10T13:15:53.055706",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s01_data_collection": {
+      "timestamp": "2026-02-10T13:15:53.287442",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s02_preprocessing": {
+      "timestamp": "2026-02-10T13:16:32.552586",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s03_eda": {
+      "timestamp": "2026-02-10T13:16:37.159702",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s03b_advanced_eda": {
+      "timestamp": "2026-02-10T13:19:35.574647",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    }
+  },
+  "summary": {
+    "total_steps": 5,
+    "best_models_per_step": {},
+    "overall_best": null
+  },
+  "errors": [
+    {
+      "step": 4,
+      "error": "Input X contains NaN.\nLinearRegression does not accept missing values encoded as NaN natively. For supervised learning, you might want to consider sklearn.ensemble.HistGradientBoostingClassifier and Regressor which accept missing values encoded as NaNs natively. Alternatively, it is possible to preprocess the data, for instance by using an imputer transformer in a pipeline or drop samples with missing values. See https://scikit-learn.org/stable/modules/impute.html You can find a list of all estimators that handle NaN values at the following page: https://scikit-learn.org/stable/modules/impute.html#estimators-that-handle-nan-values"
+    }
+  ]
+}

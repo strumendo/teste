@@ -1,0 +1,33 @@
+{
+  "run_id": "20260205_120601",
+  "timestamp": "2026-02-05T12:06:01.656921",
+  "steps": {
+    "s01_data_collection": {
+      "timestamp": "2026-02-05T12:06:04.882931",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s02_preprocessing": {
+      "timestamp": "2026-02-05T12:06:17.969164",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    }
+  },
+  "summary": {
+    "total_steps": 2,
+    "best_models_per_step": {},
+    "overall_best": null
+  },
+  "errors": [
+    {
+      "step": 3,
+      "error": "Number of rows must be a positive integer, not 0"
+    }
+  ]
+}

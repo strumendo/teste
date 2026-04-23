@@ -1,0 +1,240 @@
+{
+  "run_id": "20251209_144813",
+  "timestamp": "2025-12-09T14:48:13.600538",
+  "steps": {
+    "s02_regression_linear": {
+      "timestamp": "2025-12-09T14:48:14.382724",
+      "models": {
+        "LinearRegression": {
+          "mse": 0.08238485847296641,
+          "r2": -0.0035654213438893745
+        },
+        "Ridge": {
+          "mse": 0.08238485824143485,
+          "r2": -0.0035654185235038938
+        },
+        "Lasso": {
+          "mse": 0.08242898910288528,
+          "r2": -0.0041029955417406505
+        },
+        "DecisionTreeRegressor": {
+          "mse": 0.1696609204967033,
+          "r2": -1.0667126984230584
+        },
+        "RandomForestRegressor": {
+          "mse": 0.09388610307013653,
+          "r2": -0.1436670321747877
+        },
+        "GradientBoostingRegressor": {
+          "mse": 0.09089128509563153,
+          "r2": -0.10718586539074093
+        }
+      },
+      "params": {},
+      "best_model": "Ridge",
+      "best_mse": 0.08238485824143485,
+      "best_r2": -0.0035654185235038938
+    },
+    "s03_regression_trees": {
+      "timestamp": "2025-12-09T14:48:14.994508",
+      "models": {
+        "DecisionTree": {
+          "mse": 0.16070689285381826,
+          "r2": -0.9576398336914231
+        },
+        "RandomForest": {
+          "mse": 0.09159203587459269,
+          "r2": -0.11572201224806644
+        },
+        "GradientBoosting": {
+          "mse": 0.09099245089534225,
+          "r2": -0.10841820954103887
+        },
+        "XGBoost": {
+          "mse": 0.11885908827689864,
+          "r2": -0.4478737139094262
+        }
+      },
+      "params": {},
+      "best_model": "GradientBoosting",
+      "best_mse": 0.09099245089534225,
+      "best_r2": -0.10841820954103887
+    },
+    "s04_regression_svr": {
+      "timestamp": "2025-12-09T14:48:15.092242",
+      "models": {
+        "SVR_rbf": {
+          "mse": 0.08845529529212737,
+          "r2": -0.07751202508979205
+        },
+        "SVR_linear": {
+          "mse": 0.08222226764707852,
+          "r2": -0.0015848325110230377
+        },
+        "SVR_poly": {
+          "mse": 0.08260995087274413,
+          "r2": -0.006307368750382292
+        }
+      },
+      "params": {},
+      "best_model": "SVR_linear",
+      "best_mse": 0.08222226764707852,
+      "best_r2": -0.0015848325110230377
+    },
+    "s05_classification": {
+      "timestamp": "2025-12-09T14:48:16.978837",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s06_maintenance_basic": {
+      "timestamp": "2025-12-09T14:48:17.584855",
+      "models": {
+        "SVR": {
+          "mse": 11890.458702146407,
+          "r2": -0.002225943261062291
+        },
+        "XGBoost": {
+          "mse": 15822.1396484375,
+          "r2": -0.33362042903900146
+        },
+        "RandomForest": {
+          "mse": 13504.503709499999,
+          "r2": -0.13827097066347482
+        },
+        "GradientBoosting": {
+          "mse": 13763.558009183527,
+          "r2": -0.16010620396774522
+        },
+        "DecisionTree": {
+          "mse": 25974.455,
+          "r2": -1.1893413294785509
+        }
+      },
+      "params": {},
+      "best_model": "SVR",
+      "best_mse": 11890.458702146407,
+      "best_r2": -0.002225943261062291
+    },
+    "s07_maintenance_decision_tree": {
+      "timestamp": "2025-12-09T14:48:17.598729",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s08_maintenance_random_forest": {
+      "timestamp": "2025-12-09T14:48:23.054219",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s09_maintenance_ensemble": {
+      "timestamp": "2025-12-09T14:49:18.105054",
+      "models": {
+        "SVM": {
+          "mse": 11887.454008034465,
+          "r2": -0.0019726828557251608
+        },
+        "RandomForest": {
+          "mse": 12284.868755419013,
+          "r2": -0.035470076021174135
+        },
+        "GradientBoosting": {
+          "mse": 11925.36228356012,
+          "r2": -0.005167905020639685
+        }
+      },
+      "params": {},
+      "best_model": "SVM",
+      "best_mse": 11887.454008034465,
+      "best_r2": -0.0019726828557251608
+    },
+    "s10_maintenance_xgboost": {
+      "timestamp": "2025-12-09T14:49:29.521519",
+      "models": {
+        "SVM": {
+          "mse": 11887.454008034465,
+          "r2": -0.0019726828557251608
+        },
+        "RandomForest": {
+          "mse": 12284.868755419013,
+          "r2": -0.035470076021174135
+        },
+        "XGBoost": {
+          "mse": 11943.458984375,
+          "r2": -0.006693243980407715
+        }
+      },
+      "params": {},
+      "best_model": "SVM",
+      "best_mse": 11887.454008034465,
+      "best_r2": -0.0019726828557251608
+    },
+    "s11_maintenance_xgboost_bayes": {
+      "timestamp": "2025-12-09T14:49:32.987096",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    }
+  },
+  "summary": {
+    "total_steps": 10,
+    "best_models_per_step": {
+      "s02_regression_linear": {
+        "model": "Ridge",
+        "mse": 0.08238485824143485,
+        "r2": -0.0035654185235038938,
+        "accuracy": null
+      },
+      "s03_regression_trees": {
+        "model": "GradientBoosting",
+        "mse": 0.09099245089534225,
+        "r2": -0.10841820954103887,
+        "accuracy": null
+      },
+      "s04_regression_svr": {
+        "model": "SVR_linear",
+        "mse": 0.08222226764707852,
+        "r2": -0.0015848325110230377,
+        "accuracy": null
+      },
+      "s06_maintenance_basic": {
+        "model": "SVR",
+        "mse": 11890.458702146407,
+        "r2": -0.002225943261062291,
+        "accuracy": null
+      },
+      "s09_maintenance_ensemble": {
+        "model": "SVM",
+        "mse": 11887.454008034465,
+        "r2": -0.0019726828557251608,
+        "accuracy": null
+      },
+      "s10_maintenance_xgboost": {
+        "model": "SVM",
+        "mse": 11887.454008034465,
+        "r2": -0.0019726828557251608,
+        "accuracy": null
+      }
+    },
+    "overall_best": {
+      "step": "s04_regression_svr",
+      "model": "SVR_linear",
+      "mse": 0.08222226764707852
+    }
+  },
+  "errors": [
+    {
+      "step": 1,
+      "error": "The truth value of a DataFrame is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all()."
+    }
+  ]
+}

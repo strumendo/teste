@@ -1,0 +1,455 @@
+{
+  "raw_files": {
+    "IJ-119.xlsx": {
+      "name": "IJ-119.xlsx",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-119.xlsx",
+      "size": 87051,
+      "modified": 1767638259.309506,
+      "modified_date": "2026-01-05T15:37:39.309506",
+      "hash": "b50259966ffcbaf499941da6a19ad954"
+    },
+    "IJ-131.xlsx": {
+      "name": "IJ-131.xlsx",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-131.xlsx",
+      "size": 84843,
+      "modified": 1767638514.5371137,
+      "modified_date": "2026-01-05T15:41:54.537114",
+      "hash": "16c21793db017dfa87067ada7964f627"
+    },
+    "IJ-123.xlsx": {
+      "name": "IJ-123.xlsx",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-123.xlsx",
+      "size": 70198,
+      "modified": 1767638387.7116413,
+      "modified_date": "2026-01-05T15:39:47.711641",
+      "hash": "afb91d9f64d8217b4cac15330ba54db9"
+    },
+    "IJ-130.xlsx": {
+      "name": "IJ-130.xlsx",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-130.xlsx",
+      "size": 9307,
+      "modified": 1767638488.6383007,
+      "modified_date": "2026-01-05T15:41:28.638301",
+      "hash": "eaba3c1755fbdce002bec2229c351436"
+    },
+    "IJ-134.xlsx": {
+      "name": "IJ-134.xlsx",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-134.xlsx",
+      "size": 78549,
+      "modified": 1767638587.9664934,
+      "modified_date": "2026-01-05T15:43:07.966493",
+      "hash": "7fbda222e790aa4aaca674189ba2c51c"
+    },
+    "IJ-133.xlsx": {
+      "name": "IJ-133.xlsx",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-133.xlsx",
+      "size": 60387,
+      "modified": 1767638562.2606952,
+      "modified_date": "2026-01-05T15:42:42.260695",
+      "hash": "174c556e9750bef24993388a69693c78"
+    },
+    "IJ-132.xlsx": {
+      "name": "IJ-132.xlsx",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-132.xlsx",
+      "size": 49561,
+      "modified": 1767638537.5100932,
+      "modified_date": "2026-01-05T15:42:17.510093",
+      "hash": "5edb0450335b669c69117ea7322eb6b9"
+    },
+    "IJ-151.xlsx": {
+      "name": "IJ-151.xlsx",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-151.xlsx",
+      "size": 82217,
+      "modified": 1767638732.995432,
+      "modified_date": "2026-01-05T15:45:32.995432",
+      "hash": "d33bcb53b54faa2dcf1be2c900a7407b"
+    },
+    "IJ-124.xlsx": {
+      "name": "IJ-124.xlsx",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-124.xlsx",
+      "size": 76057,
+      "modified": 1767638417.2393084,
+      "modified_date": "2026-01-05T15:40:17.239308",
+      "hash": "c88eb8c638ed476ec6c6b930bbc98724"
+    },
+    "IJ-046.xlsx": {
+      "name": "IJ-046.xlsx",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-046.xlsx",
+      "size": 81045,
+      "modified": 1767638152.6821337,
+      "modified_date": "2026-01-05T15:35:52.682134",
+      "hash": "edd860c45fb4f63cb9bef232ec86d15e"
+    },
+    "IJ-156.xlsx": {
+      "name": "IJ-156.xlsx",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-156.xlsx",
+      "size": 28303,
+      "modified": 1767638781.4495633,
+      "modified_date": "2026-01-05T15:46:21.449563",
+      "hash": "06932370192fa2ec03bb3e67a574e613"
+    },
+    "IJ-122.xlsx": {
+      "name": "IJ-122.xlsx",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-122.xlsx",
+      "size": 51575,
+      "modified": 1767638348.7547045,
+      "modified_date": "2026-01-05T15:39:08.754704",
+      "hash": "c781554e3c4f706a19a6792c6bab3f63"
+    },
+    "IJ-121.xlsx": {
+      "name": "IJ-121.xlsx",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-121.xlsx",
+      "size": 81624,
+      "modified": 1767638321.7545497,
+      "modified_date": "2026-01-05T15:38:41.754550",
+      "hash": "24994787f6bfdf97253a9f0955f1227e"
+    },
+    "IJ-138.xlsx": {
+      "name": "IJ-138.xlsx",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-138.xlsx",
+      "size": 66069,
+      "modified": 1767638684.8256202,
+      "modified_date": "2026-01-05T15:44:44.825620",
+      "hash": "ff0e4265a7a7101dd6a240bdd79b0ce9"
+    },
+    "IJ-125.xlsx": {
+      "name": "IJ-125.xlsx",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-125.xlsx",
+      "size": 52258,
+      "modified": 1767638438.048084,
+      "modified_date": "2026-01-05T15:40:38.048084",
+      "hash": "6fb465b3a42cbebc7064c89943b35dfb"
+    },
+    "IJ-117.xlsx": {
+      "name": "IJ-117.xlsx",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-117.xlsx",
+      "size": 82440,
+      "modified": 1767638194.6505198,
+      "modified_date": "2026-01-05T15:36:34.650520",
+      "hash": "ed82f914e33d93100cebfb3ea7164625"
+    },
+    "IJ-152.xlsx": {
+      "name": "IJ-152.xlsx",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-152.xlsx",
+      "size": 75157,
+      "modified": 1767638758.3834784,
+      "modified_date": "2026-01-05T15:45:58.383478",
+      "hash": "805eea8cf5d2779545c5e94f5120eb05"
+    },
+    "IJ-138.2.xlsx": {
+      "name": "IJ-138.2.xlsx",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-138.2.xlsx",
+      "size": 1697366,
+      "modified": 1739472565.0,
+      "modified_date": "2025-02-13T15:49:25",
+      "hash": "123508c2d97453745cd7521d4c57e97b"
+    },
+    "IJ-136.xlsx": {
+      "name": "IJ-136.xlsx",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-136.xlsx",
+      "size": 52133,
+      "modified": 1767638632.939464,
+      "modified_date": "2026-01-05T15:43:52.939464",
+      "hash": "372de6934408b537b2a79c0b21050722"
+    },
+    "IJ-164.xlsx": {
+      "name": "IJ-164.xlsx",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-164.xlsx",
+      "size": 73413,
+      "modified": 1767638806.8135054,
+      "modified_date": "2026-01-05T15:46:46.813505",
+      "hash": "e59da0530b7de3a30d9d1d21774eacc5"
+    },
+    "IJ-118.xlsx": {
+      "name": "IJ-118.xlsx",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-118.xlsx",
+      "size": 85140,
+      "modified": 1767638227.2835007,
+      "modified_date": "2026-01-05T15:37:07.283501",
+      "hash": "cce06637cc3aa67a99f803bfee68b2ca"
+    },
+    "IJ-139.xlsx": {
+      "name": "IJ-139.xlsx",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-139.xlsx",
+      "size": 67609,
+      "modified": 1767638707.5826092,
+      "modified_date": "2026-01-05T15:45:07.582609",
+      "hash": "9555fae451b1ec6a946abc9229d1e1be"
+    },
+    "IJ-044.xlsx": {
+      "name": "IJ-044.xlsx",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-044.xlsx",
+      "size": 63202,
+      "modified": 1767638121.1041472,
+      "modified_date": "2026-01-05T15:35:21.104147",
+      "hash": "73b7f7d1839a92d64ca9045a3745945e"
+    },
+    "IJ-120.xlsx": {
+      "name": "IJ-120.xlsx",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-120.xlsx",
+      "size": 77010,
+      "modified": 1767638290.153862,
+      "modified_date": "2026-01-05T15:38:10.153862",
+      "hash": "f4100ea39ab23c95a73759b167c3d53c"
+    },
+    "IJ-129.xlsx": {
+      "name": "IJ-129.xlsx",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-129.xlsx",
+      "size": 87969,
+      "modified": 1767638467.883141,
+      "modified_date": "2026-01-05T15:41:07.883141",
+      "hash": "15694701fc53bf67d79c4e540cc7824a"
+    },
+    "IJ-135.xlsx": {
+      "name": "IJ-135.xlsx",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-135.xlsx",
+      "size": 61909,
+      "modified": 1767638610.60555,
+      "modified_date": "2026-01-05T15:43:30.605550",
+      "hash": "58909e68c0375ecc6a686858630bc7d3"
+    },
+    "IJ-137.xlsx": {
+      "name": "IJ-137.xlsx",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-137.xlsx",
+      "size": 63757,
+      "modified": 1767638655.908187,
+      "modified_date": "2026-01-05T15:44:15.908187",
+      "hash": "5b64006f344419a2b9ee612a726b3d14"
+    },
+    "IJ-129.csv": {
+      "name": "IJ-129.csv",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-129.csv",
+      "size": 115355,
+      "modified": 1770397456.322247,
+      "modified_date": "2026-02-06T14:04:16.322247",
+      "hash": "f069896179ee6bf931cdffba547834d3"
+    },
+    "IJ-044.csv": {
+      "name": "IJ-044.csv",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-044.csv",
+      "size": 80606,
+      "modified": 1770397455.149259,
+      "modified_date": "2026-02-06T14:04:15.149259",
+      "hash": "a45d8c560a08b8c9a2d3c1844ffb4213"
+    },
+    "IJ-152.csv": {
+      "name": "IJ-152.csv",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-152.csv",
+      "size": 97028,
+      "modified": 1770397457.509235,
+      "modified_date": "2026-02-06T14:04:17.509235",
+      "hash": "2a2ecfc5a4cedcdd464857123f581912"
+    },
+    "IJ-137.csv": {
+      "name": "IJ-137.csv",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-137.csv",
+      "size": 123540,
+      "modified": 1770397456.99824,
+      "modified_date": "2026-02-06T14:04:16.998240",
+      "hash": "569b3757fd7508d44066baa78d5a04c1"
+    },
+    "IJ-139.csv": {
+      "name": "IJ-139.csv",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-139.csv",
+      "size": 89842,
+      "modified": 1770397457.285237,
+      "modified_date": "2026-02-06T14:04:17.285237",
+      "hash": "0b3a2a0307d56763a0788822eb3fa114"
+    },
+    "IJ-122.csv": {
+      "name": "IJ-122.csv",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-122.csv",
+      "size": 72164,
+      "modified": 1770397455.9202511,
+      "modified_date": "2026-02-06T14:04:15.920251",
+      "hash": "f91fccacd56a06e5feea928a7e441c90"
+    },
+    "IJ-123.csv": {
+      "name": "IJ-123.csv",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-123.csv",
+      "size": 83526,
+      "modified": 1770397456.01725,
+      "modified_date": "2026-02-06T14:04:16.017250",
+      "hash": "0bd6f0a604e914c1abcb1dbd48b5be47"
+    },
+    "IJ-130.csv": {
+      "name": "IJ-130.csv",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-130.csv",
+      "size": 3562,
+      "modified": 1770397456.3372784,
+      "modified_date": "2026-02-06T14:04:16.337278",
+      "hash": "a1bd852b7da7567c3fd114be2687e03b"
+    },
+    "IJ-121.csv": {
+      "name": "IJ-121.csv",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-121.csv",
+      "size": 105729,
+      "modified": 1770397455.849252,
+      "modified_date": "2026-02-06T14:04:15.849252",
+      "hash": "219464532a161b49b489522baeaa39e8"
+    },
+    "IJ-135.csv": {
+      "name": "IJ-135.csv",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-135.csv",
+      "size": 73786,
+      "modified": 1770397456.820242,
+      "modified_date": "2026-02-06T14:04:16.820242",
+      "hash": "b7a1aa8038b8db780dbc504b8ec968d9"
+    },
+    "IJ-119.csv": {
+      "name": "IJ-119.csv",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-119.csv",
+      "size": 119884,
+      "modified": 1770397455.6242542,
+      "modified_date": "2026-02-06T14:04:15.624254",
+      "hash": "8d1b39731a70f5bcaf581cf24f169c55"
+    },
+    "IJ-125.csv": {
+      "name": "IJ-125.csv",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-125.csv",
+      "size": 64309,
+      "modified": 1770397456.2082481,
+      "modified_date": "2026-02-06T14:04:16.208248",
+      "hash": "cba60dadfd1205ed20c2dbcd729e9032"
+    },
+    "IJ-132.csv": {
+      "name": "IJ-132.csv",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-132.csv",
+      "size": 61164,
+      "modified": 1770397456.5362449,
+      "modified_date": "2026-02-06T14:04:16.536245",
+      "hash": "f84c2bdb7790645060baae76b9dd6f9d"
+    },
+    "IJ-118.csv": {
+      "name": "IJ-118.csv",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-118.csv",
+      "size": 121502,
+      "modified": 1770397455.4982555,
+      "modified_date": "2026-02-06T14:04:15.498255",
+      "hash": "367d2bbd6b10cb69a5185d1c5a522c6a"
+    },
+    "IJ-120.csv": {
+      "name": "IJ-120.csv",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-120.csv",
+      "size": 94440,
+      "modified": 1770397455.7312531,
+      "modified_date": "2026-02-06T14:04:15.731253",
+      "hash": "36d4bf7172d57be4de35c220957b0f31"
+    },
+    "IJ-131.csv": {
+      "name": "IJ-131.csv",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-131.csv",
+      "size": 104247,
+      "modified": 1770397456.4642456,
+      "modified_date": "2026-02-06T14:04:16.464246",
+      "hash": "1086e06849dc4c38add656381d3938d9"
+    },
+    "IJ-151.csv": {
+      "name": "IJ-151.csv",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-151.csv",
+      "size": 104471,
+      "modified": 1770397457.395236,
+      "modified_date": "2026-02-06T14:04:17.395236",
+      "hash": "e0c19f6eea635a8eba23b8273204b3dc"
+    },
+    "IJ-136.csv": {
+      "name": "IJ-136.csv",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-136.csv",
+      "size": 64058,
+      "modified": 1770397456.906241,
+      "modified_date": "2026-02-06T14:04:16.906241",
+      "hash": "3db1877c861a8a2529130a9c4f4de233"
+    },
+    "IJ-134.csv": {
+      "name": "IJ-134.csv",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-134.csv",
+      "size": 105648,
+      "modified": 1770397456.7362428,
+      "modified_date": "2026-02-06T14:04:16.736243",
+      "hash": "7d81d04b446b82238a7f5b68103c0085"
+    },
+    "IJ-133.csv": {
+      "name": "IJ-133.csv",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-133.csv",
+      "size": 77147,
+      "modified": 1770397456.6322439,
+      "modified_date": "2026-02-06T14:04:16.632244",
+      "hash": "8378ea356cd853ef1d7afc7417012a92"
+    },
+    "IJ-138.csv": {
+      "name": "IJ-138.csv",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-138.csv",
+      "size": 79044,
+      "modified": 1770397457.1912382,
+      "modified_date": "2026-02-06T14:04:17.191238",
+      "hash": "a5ce20df34287b2a23b6a9f23a833f8f"
+    },
+    "IJ-164.csv": {
+      "name": "IJ-164.csv",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-164.csv",
+      "size": 94046,
+      "modified": 1770397457.6462336,
+      "modified_date": "2026-02-06T14:04:17.646234",
+      "hash": "4af8419c23b06d3faf86689319ea48db"
+    },
+    "IJ-046.csv": {
+      "name": "IJ-046.csv",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-046.csv",
+      "size": 104376,
+      "modified": 1770397455.2622578,
+      "modified_date": "2026-02-06T14:04:15.262258",
+      "hash": "6c3cf1511a77b85eb5251d7654134ec8"
+    },
+    "IJ-124.csv": {
+      "name": "IJ-124.csv",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-124.csv",
+      "size": 94137,
+      "modified": 1770397456.1322489,
+      "modified_date": "2026-02-06T14:04:16.132249",
+      "hash": "c7a6f028e4092cd228eef2340f7bd19d"
+    },
+    "IJ-117.csv": {
+      "name": "IJ-117.csv",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-117.csv",
+      "size": 116896,
+      "modified": 1770397455.3852565,
+      "modified_date": "2026-02-06T14:04:15.385257",
+      "hash": "fb0182ac2f133d98e360d952e33e3abf"
+    },
+    "IJ-156.csv": {
+      "name": "IJ-156.csv",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/IJ-156.csv",
+      "size": 28994,
+      "modified": 1770397457.5492344,
+      "modified_date": "2026-02-06T14:04:17.549234",
+      "hash": "8db479ff52575a16a26c8db00979d5b7"
+    },
+    "DadosProducaodez2025-jan2026.xlsx": {
+      "name": "DadosProducaodez2025-jan2026.xlsx",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/raw/DadosProducaodez2025-jan2026.xlsx",
+      "size": 177222,
+      "modified": 1770293314.647595,
+      "modified_date": "2026-02-05T09:08:34.647595",
+      "hash": "1919785fe6bb9c6a2537a6339d9986fc"
+    }
+  },
+  "maintenance_files": {
+    "Dados Manut - 27 Equip - 2025.xlsx": {
+      "name": "Dados Manut - 27 Equip - 2025.xlsx",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/manutencao/Dados Manut - 27 Equip - 2025.xlsx",
+      "size": 701495,
+      "modified": 1770321178.5934951,
+      "modified_date": "2026-02-05T16:52:58.593495",
+      "hash": "377296cc63120d0878de9f8eab2a7328"
+    },
+    "dados_manutencao.csv": {
+      "name": "dados_manutencao.csv",
+      "path": "/home/strumendo/PyCharmMiscProject/sabo/sabo/sabo/Fase02/data/manutencao/dados_manutencao.csv",
+      "size": 82658,
+      "modified": 1739472570.0,
+      "modified_date": "2025-02-13T15:49:30",
+      "hash": "33f2059715ade1ee7961d7814bf7dbdb"
+    }
+  },
+  "scan_time": "2026-02-06T15:22:20.048048"
+}

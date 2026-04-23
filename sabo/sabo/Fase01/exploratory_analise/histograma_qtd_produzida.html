@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    #vis.vega-embed {
+      width: 100%;
+      display: flex;
+    }
+
+    #vis.vega-embed details,
+    #vis.vega-embed details summary {
+      position: relative;
+    }
+  </style>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-lite@5.20.1"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+</head>
+<body>
+  <div id="vis"></div>
+  <script>
+    (function(vegaEmbed) {
+      var spec = {"config": {"view": {"continuousWidth": 300, "continuousHeight": 300}}, "data": {"name": "data-20b1d1da6385c76e0aa12b016a71f15a"}, "mark": {"type": "bar"}, "encoding": {"tooltip": [{"bin": true, "field": "Qtd. Produzida", "type": "quantitative"}, {"aggregate": "count", "type": "quantitative"}], "x": {"bin": true, "field": "Qtd. Produzida", "type": "quantitative"}, "y": {"aggregate": "count", "type": "quantitative"}}, "params": [{"name": "param_9", "select": {"type": "interval", "encodings": ["x", "y"]}, "bind": "scales"}], "title": "Histograma - Qtd. Produzida", "$schema": "https://vega.github.io/schema/vega-lite/v5.20.1.json", "datasets": {"data-20b1d1da6385c76e0aa12b016a71f15a": [{"C\u00f3d. Produto": "SA02961", "Descri\u00e7\u00e3o da massa (Composto)": "P212/1", "Dias em Servi\u00e7o": 4132, "ANO CONSTRU\u00c7\u00c3O": 2003.0, "MODELO": "V17EY", "TIPO OBJETO (FAM\u00cdLIA)": "IRP1", "POSI\u00c7\u00c3O DO CANH\u00c3O DE INJE\u00c7\u00c3O": "SUPERIOR", "Consumo de massa total": 607.9200000000001, "Qtd. Produzida": 447}, {"C\u00f3d. Produto": "SA02961", "Descri\u00e7\u00e3o da massa (Composto)": "P212/1", "Dias em Servi\u00e7o": 4133, "ANO CONSTRU\u00c7\u00c3O": 2003.0, "MODELO": "V17EY", "TIPO OBJETO (FAM\u00cdLIA)": "IRP1", "POSI\u00c7\u00c3O DO CANH\u00c3O DE INJE\u00c7\u00c3O": "SUPERIOR", "Consumo de massa total": 1467.44, "Qtd. Produzida": 1079}, {"C\u00f3d. Produto": "SA02961", "Descri\u00e7\u00e3o da massa (Composto)": "P212/1", "Dias em Servi\u00e7o": 4134, "ANO CONSTRU\u00c7\u00c3O": 2003.0, "MODELO": "V17EY", "TIPO OBJETO (FAM\u00cdLIA)": "IRP1", "POSI\u00c7\u00c3O DO CANH\u00c3O DE INJE\u00c7\u00c3O": "SUPERIOR", "Consumo de massa total": 1432.0800000000002, "Qtd. Produzida": 1053}, {"C\u00f3d. Produto": "SA02961", "Descri\u00e7\u00e3o da massa (Composto)": "P212/1", "Dias em Servi\u00e7o": 4136, "ANO CONSTRU\u00c7\u00c3O": 2003.0, "MODELO": "V17EY", "TIPO OBJETO (FAM\u00cdLIA)": "IRP1", "POSI\u00c7\u00c3O DO CANH\u00c3O DE INJE\u00c7\u00c3O": "SUPERIOR", "Consumo de massa total": 209.44000000000003, "Qtd. Produzida": 154}, {"C\u00f3d. Produto": "SA02961", "Descri\u00e7\u00e3o da massa (Composto)": "P212/1", "Dias em Servi\u00e7o": 4137, "ANO CONSTRU\u00c7\u00c3O": 2003.0, "MODELO": "V17EY", "TIPO OBJETO (FAM\u00cdLIA)": "IRP1", "POSI\u00c7\u00c3O DO CANH\u00c3O DE INJE\u00c7\u00c3O": "SUPERIOR", "Consumo de massa total": 1260.72, "Qtd. Produzida": 927}, {"C\u00f3d. Produto": "SA02961", "Descri\u00e7\u00e3o da massa (Composto)": "P212/1", "Dias em Servi\u00e7o": 4138, "ANO CONSTRU\u00c7\u00c3O": 2003.0, "MODELO": "V17EY", "TIPO OBJETO (FAM\u00cdLIA)": "IRP1", "POSI\u00c7\u00c3O DO CANH\u00c3O DE INJE\u00c7\u00c3O": "SUPERIOR", "Consumo de massa total": 187.68, "Qtd. Produzida": 138}]}};
+      var embedOpt = {"mode": "vega-lite"};
+
+      function showError(el, error){
+          el.innerHTML = ('<div style="color:red;">'
+                          + '<p>JavaScript Error: ' + error.message + '</p>'
+                          + "<p>This usually means there's a typo in your chart specification. "
+                          + "See the javascript console for the full traceback.</p>"
+                          + '</div>');
+          throw error;
+      }
+      const el = document.getElementById('vis');
+      vegaEmbed("#vis", spec, embedOpt)
+        .catch(error => showError(el, error));
+    })(vegaEmbed);
+
+  </script>
+</body>
+</html>

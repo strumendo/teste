@@ -1,0 +1,81 @@
+{
+  "run_id": "20251223_114610",
+  "timestamp": "2025-12-23T11:46:10.202311",
+  "steps": {
+    "s01_data_collection": {
+      "timestamp": "2025-12-23T11:46:13.260948",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s02_preprocessing": {
+      "timestamp": "2025-12-23T11:46:24.932219",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s03_eda": {
+      "timestamp": "2025-12-23T11:46:28.809012",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s03b_advanced_eda": {
+      "timestamp": "2025-12-23T11:46:31.718661",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s04_modeling": {
+      "timestamp": "2025-12-23T11:46:32.504410",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s05_evaluation": {
+      "timestamp": "2025-12-23T11:46:32.622717",
+      "models": {
+        "metrics": {
+          "mse": 1774.5289529953754,
+          "r2": 0.9506928827646206
+        }
+      },
+      "params": {},
+      "best_model": "metrics",
+      "best_mse": 1774.5289529953754,
+      "best_r2": 0.9506928827646206
+    }
+  },
+  "summary": {
+    "total_steps": 6,
+    "best_models_per_step": {
+      "s05_evaluation": {
+        "model": "metrics",
+        "mse": 1774.5289529953754,
+        "r2": 0.9506928827646206,
+        "accuracy": null
+      }
+    },
+    "overall_best": {
+      "step": "s05_evaluation",
+      "model": "metrics",
+      "mse": 1774.5289529953754
+    }
+  },
+  "errors": [
+    {
+      "step": 6,
+      "error": "cannot access local variable 'datetime' where it is not associated with a value"
+    }
+  ]
+}

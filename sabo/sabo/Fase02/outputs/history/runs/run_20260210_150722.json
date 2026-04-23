@@ -1,0 +1,35 @@
+{
+  "run_id": "20260210_150722",
+  "timestamp": "2026-02-10T15:07:22.815023",
+  "steps": {
+    "s06_generate_report": {
+      "timestamp": "2026-02-10T15:07:31.113967",
+      "models": {
+        "metrics": {
+          "mse": 1080.7928466796875,
+          "r2": 0.9550749063491821
+        }
+      },
+      "params": {},
+      "best_model": "metrics",
+      "best_mse": 1080.7928466796875,
+      "best_r2": 0.9550749063491821
+    }
+  },
+  "summary": {
+    "total_steps": 1,
+    "best_models_per_step": {
+      "s06_generate_report": {
+        "model": "metrics",
+        "mse": 1080.7928466796875,
+        "r2": 0.9550749063491821,
+        "accuracy": null
+      }
+    },
+    "overall_best": {
+      "step": "s06_generate_report",
+      "model": "metrics",
+      "mse": 1080.7928466796875
+    }
+  }
+}

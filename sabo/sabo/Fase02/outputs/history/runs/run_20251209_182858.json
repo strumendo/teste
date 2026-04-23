@@ -1,0 +1,19 @@
+{
+  "run_id": "20251209_182858",
+  "timestamp": "2025-12-09T18:28:58.687660",
+  "steps": {
+    "s02_preprocessing": {
+      "timestamp": "2025-12-09T18:29:08.160225",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    }
+  },
+  "summary": {
+    "total_steps": 1,
+    "best_models_per_step": {},
+    "overall_best": null
+  }
+}

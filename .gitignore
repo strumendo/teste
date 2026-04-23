@@ -1,0 +1,9 @@
+# Project exclude paths
+/sabo/sabo/.venv/
+/sabo/sabo/Fase02/.venv/
+/sabo/sabo/Fase02/scripts/.venv/
+/ml_pipeline_demo/
+/.qodo/
+/.claude/
+/sabo/__MACOSX/
+/venv/

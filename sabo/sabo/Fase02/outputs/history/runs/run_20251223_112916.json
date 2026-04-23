@@ -1,0 +1,94 @@
+{
+  "run_id": "20251223_112916",
+  "timestamp": "2025-12-23T11:29:16.168273",
+  "steps": {
+    "s01_data_collection": {
+      "timestamp": "2025-12-23T11:29:20.026888",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s02_preprocessing": {
+      "timestamp": "2025-12-23T11:29:34.114636",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s03_eda": {
+      "timestamp": "2025-12-23T11:29:39.508752",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s03b_advanced_eda": {
+      "timestamp": "2025-12-23T11:29:42.811642",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s04_modeling": {
+      "timestamp": "2025-12-23T11:29:43.416583",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s05_evaluation": {
+      "timestamp": "2025-12-23T11:29:43.507143",
+      "models": {
+        "metrics": {
+          "mse": 844.2893320264932,
+          "r2": 0.9255682807330734
+        }
+      },
+      "params": {},
+      "best_model": "metrics",
+      "best_mse": 844.2893320264932,
+      "best_r2": 0.9255682807330734
+    },
+    "s06_generate_report": {
+      "timestamp": "2025-12-23T11:29:44.949960",
+      "models": {
+        "metrics": {
+          "mse": 844.2893320264932,
+          "r2": 0.9255682807330734
+        }
+      },
+      "params": {},
+      "best_model": "metrics",
+      "best_mse": 844.2893320264932,
+      "best_r2": 0.9255682807330734
+    }
+  },
+  "summary": {
+    "total_steps": 7,
+    "best_models_per_step": {
+      "s05_evaluation": {
+        "model": "metrics",
+        "mse": 844.2893320264932,
+        "r2": 0.9255682807330734,
+        "accuracy": null
+      },
+      "s06_generate_report": {
+        "model": "metrics",
+        "mse": 844.2893320264932,
+        "r2": 0.9255682807330734,
+        "accuracy": null
+      }
+    },
+    "overall_best": {
+      "step": "s05_evaluation",
+      "model": "metrics",
+      "mse": 844.2893320264932
+    }
+  }
+}

@@ -1,0 +1,95 @@
+======================================================================
+RELATÓRIO DE EXECUÇÃO - 20251209_153643
+======================================================================
+Data/Hora: 2025-12-09T15:36:43.766073
+Total de passos: 12
+
+----------------------------------------------------------------------
+RESULTADOS POR PASSO
+----------------------------------------------------------------------
+
+📌 S02_REGRESSION_LINEAR
+   Timestamp: 2025-12-09T15:36:44.520171
+   Modelos avaliados:
+     - LinearRegression: mse=0.0788, r2=0.0001
+     - Ridge: mse=0.0788, r2=0.0001
+     - Lasso: mse=0.0792, r2=-0.0041
+     - DecisionTreeRegressor: mse=0.1390, r2=-0.7623
+     - RandomForestRegressor: mse=0.0837, r2=-0.0616
+     - GradientBoostingRegressor: mse=0.0809, r2=-0.0255
+   ⭐ Melhor: LinearRegression
+
+📌 S03_REGRESSION_TREES
+   Timestamp: 2025-12-09T15:36:45.076962
+   Modelos avaliados:
+     - DecisionTree: mse=0.1389, r2=-0.7617
+     - RandomForest: mse=0.0829, r2=-0.0511
+     - GradientBoosting: mse=0.0812, r2=-0.0302
+     - XGBoost: mse=0.0904, r2=-0.1462
+   ⭐ Melhor: GradientBoosting
+
+📌 S04_REGRESSION_SVR
+   Timestamp: 2025-12-09T15:36:45.172264
+   Modelos avaliados:
+     - SVR_rbf: mse=0.0835, r2=-0.0590
+     - SVR_linear: mse=0.0792, r2=-0.0038
+     - SVR_poly: mse=0.0768, r2=0.0260
+   ⭐ Melhor: SVR_poly
+
+📌 S05_CLASSIFICATION
+   Timestamp: 2025-12-09T15:36:46.967760
+
+📌 S06_MAINTENANCE_BASIC
+   Timestamp: 2025-12-09T15:36:47.439755
+   Modelos avaliados:
+     - SVR: mse=11086.6460, r2=-0.0011
+     - XGBoost: mse=13533.3350, r2=-0.2220
+     - RandomForest: mse=11725.0462, r2=-0.0587
+     - GradientBoosting: mse=11823.9261, r2=-0.0676
+     - DecisionTree: mse=24752.0350, r2=-1.2350
+   ⭐ Melhor: SVR
+
+📌 S07_MAINTENANCE_DECISION_TREE
+   Timestamp: 2025-12-09T15:36:47.452660
+
+📌 S08_MAINTENANCE_RANDOM_FOREST
+   Timestamp: 2025-12-09T15:36:52.677076
+
+📌 S09_MAINTENANCE_ENSEMBLE
+   Timestamp: 2025-12-09T15:37:51.198100
+   Modelos avaliados:
+     - SVM: mse=11066.0486, r2=0.0008
+     - RandomForest: mse=11073.7925, r2=0.0001
+     - GradientBoosting: mse=11048.0793, r2=0.0024
+   ⭐ Melhor: GradientBoosting
+
+📌 S10_MAINTENANCE_XGBOOST
+   Timestamp: 2025-12-09T15:38:03.147000
+   Modelos avaliados:
+     - SVM: mse=11066.0486, r2=0.0008
+     - RandomForest: mse=11073.7925, r2=0.0001
+     - XGBoost: mse=11043.9316, r2=0.0028
+   ⭐ Melhor: XGBoost
+
+📌 S11_MAINTENANCE_XGBOOST_BAYES
+   Timestamp: 2025-12-09T15:38:05.727745
+
+📌 S12_GEN_REAL_DATA
+   Timestamp: 2025-12-09T15:38:06.588105
+
+📌 S13_PREDICTION_REAL_DATA
+   Timestamp: 2025-12-09T15:38:27.837899
+   Modelos avaliados:
+     - Linear Regression: mse=1997.9576, r2=0.9220
+     - Decision Tree: mse=16.4342, r2=0.9994
+     - Random Forest: mse=17.7687, r2=0.9993
+     - XGBoost: mse=35.1710, r2=0.9986
+   ⭐ Melhor: Decision Tree
+
+----------------------------------------------------------------------
+SUMÁRIO
+----------------------------------------------------------------------
+Melhor modelo geral: SVR_poly (s04_regression_svr)
+MSE: 0.0768
+
+======================================================================

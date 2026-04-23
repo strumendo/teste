@@ -1,0 +1,102 @@
+{
+  "run_id": "20260414_134058",
+  "timestamp": "2026-04-14T13:40:58.071309",
+  "steps": {
+    "s00_split_unified": {
+      "timestamp": "2026-04-14T13:41:16.768622",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s01_data_collection": {
+      "timestamp": "2026-04-14T13:41:17.393627",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s02_preprocessing": {
+      "timestamp": "2026-04-14T13:41:47.722429",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s03_eda": {
+      "timestamp": "2026-04-14T13:41:52.785246",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s03b_advanced_eda": {
+      "timestamp": "2026-04-14T13:43:35.000218",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s04_modeling": {
+      "timestamp": "2026-04-14T13:43:36.849439",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s05_evaluation": {
+      "timestamp": "2026-04-14T13:43:36.935864",
+      "models": {
+        "metrics": {
+          "mse": 959.0927240150937,
+          "r2": 0.9652423867782037
+        }
+      },
+      "params": {},
+      "best_model": "metrics",
+      "best_mse": 959.0927240150937,
+      "best_r2": 0.9652423867782037
+    },
+    "s06_generate_report": {
+      "timestamp": "2026-04-14T13:43:43.806924",
+      "models": {
+        "metrics": {
+          "mse": 959.0927240150937,
+          "r2": 0.9652423867782037
+        }
+      },
+      "params": {},
+      "best_model": "metrics",
+      "best_mse": 959.0927240150937,
+      "best_r2": 0.9652423867782037
+    }
+  },
+  "summary": {
+    "total_steps": 8,
+    "best_models_per_step": {
+      "s05_evaluation": {
+        "model": "metrics",
+        "mse": 959.0927240150937,
+        "r2": 0.9652423867782037,
+        "accuracy": null
+      },
+      "s06_generate_report": {
+        "model": "metrics",
+        "mse": 959.0927240150937,
+        "r2": 0.9652423867782037,
+        "accuracy": null
+      }
+    },
+    "overall_best": {
+      "step": "s05_evaluation",
+      "model": "metrics",
+      "mse": 959.0927240150937
+    }
+  }
+}

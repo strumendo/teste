@@ -1,0 +1,5 @@
+Cód. Ordem,Cód. Recurso,Cód. Produto,Qtd. Produzida,Qtd. Refugada,Qtd. Retrabalhada,Fator Un.,Cód. Un.,Descrição da massa (Composto),Consumo de massa no item em (Kg/100pçs),Qtd. Produzida Acumulada Total,Qtd. Refugada Acumulada Total,Qtd. Retrabalhada Acumulada Total,Fator Un. Acumulado Total,Consumo de massa no item em (Kg/100pçs) Acumulado Total,Manutencao
+2723425,IJ-130,SA05776,586,0,0,4,PC,MASSA F403/32,11.5,586,0,0,4,11.5,-355
+2723425,IJ-130,SA05776,969,12,0,3,PC,MASSA F403/32,6.75,1555,12,0,7,18.25,-356
+2723425,IJ-130,SA05776,51,0,0,1,PC,MASSA F403/32,2.25,1606,12,0,8,20.5,-358
+2723652,IJ-130,SA01684,134,6,0,2,PC,N148/18,3.45,1740,18,0,10,23.95,-359

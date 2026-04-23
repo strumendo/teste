@@ -1,0 +1,118 @@
+{
+  "run_id": "20260422_145714",
+  "timestamp": "2026-04-22T14:57:14.947571",
+  "steps": {
+    "s00_split_unified": {
+      "timestamp": "2026-04-22T14:57:14.953520",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s01_data_collection": {
+      "timestamp": "2026-04-22T14:57:15.549860",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s02_preprocessing": {
+      "timestamp": "2026-04-22T14:58:02.508385",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s03_eda": {
+      "timestamp": "2026-04-22T14:58:07.496019",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s03b_advanced_eda": {
+      "timestamp": "2026-04-22T15:01:53.998694",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s04_modeling": {
+      "timestamp": "2026-04-22T15:01:56.296009",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s05_evaluation": {
+      "timestamp": "2026-04-22T15:01:56.397787",
+      "models": {
+        "metrics": {
+          "mse": 8281.181640625,
+          "r2": 0.6736739873886108
+        }
+      },
+      "params": {},
+      "best_model": "metrics",
+      "best_mse": 8281.181640625,
+      "best_r2": 0.6736739873886108
+    },
+    "s06_generate_report": {
+      "timestamp": "2026-04-22T15:02:02.963923",
+      "models": {
+        "metrics": {
+          "mse": 8281.181640625,
+          "r2": 0.6736739873886108
+        }
+      },
+      "params": {},
+      "best_model": "metrics",
+      "best_mse": 8281.181640625,
+      "best_r2": 0.6736739873886108
+    },
+    "s07_hist_manutencao": {
+      "timestamp": "2026-04-22T15:02:03.352583",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s08_prescricao_manutencao": {
+      "timestamp": "2026-04-22T15:02:03.465606",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    }
+  },
+  "summary": {
+    "total_steps": 10,
+    "best_models_per_step": {
+      "s05_evaluation": {
+        "model": "metrics",
+        "mse": 8281.181640625,
+        "r2": 0.6736739873886108,
+        "accuracy": null
+      },
+      "s06_generate_report": {
+        "model": "metrics",
+        "mse": 8281.181640625,
+        "r2": 0.6736739873886108,
+        "accuracy": null
+      }
+    },
+    "overall_best": {
+      "step": "s05_evaluation",
+      "model": "metrics",
+      "mse": 8281.181640625
+    }
+  }
+}

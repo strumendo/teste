@@ -1,0 +1,83 @@
+======================================================================
+RELATÓRIO DE EXECUÇÃO - 20251209_152456
+======================================================================
+Data/Hora: 2025-12-09T15:24:56.035713
+Total de passos: 10
+
+----------------------------------------------------------------------
+RESULTADOS POR PASSO
+----------------------------------------------------------------------
+
+📌 S02_REGRESSION_LINEAR
+   Timestamp: 2025-12-09T15:24:56.788762
+   Modelos avaliados:
+     - LinearRegression: mse=0.0854, r2=-0.0547
+     - Ridge: mse=0.0854, r2=-0.0547
+     - Lasso: mse=0.0846, r2=-0.0453
+     - DecisionTreeRegressor: mse=0.1788, r2=-1.2087
+     - RandomForestRegressor: mse=0.0969, r2=-0.1966
+     - GradientBoostingRegressor: mse=0.0904, r2=-0.1160
+   ⭐ Melhor: Lasso
+
+📌 S03_REGRESSION_TREES
+   Timestamp: 2025-12-09T15:24:57.425331
+   Modelos avaliados:
+     - DecisionTree: mse=0.1734, r2=-1.1413
+     - RandomForest: mse=0.0955, r2=-0.1792
+     - GradientBoosting: mse=0.0903, r2=-0.1147
+     - XGBoost: mse=0.1165, r2=-0.4392
+   ⭐ Melhor: GradientBoosting
+
+📌 S04_REGRESSION_SVR
+   Timestamp: 2025-12-09T15:24:57.522787
+   Modelos avaliados:
+     - SVR_rbf: mse=0.0876, r2=-0.0821
+     - SVR_linear: mse=0.0870, r2=-0.0741
+     - SVR_poly: mse=0.0880, r2=-0.0873
+   ⭐ Melhor: SVR_linear
+
+📌 S05_CLASSIFICATION
+   Timestamp: 2025-12-09T15:24:59.723581
+
+📌 S06_MAINTENANCE_BASIC
+   Timestamp: 2025-12-09T15:25:00.276631
+   Modelos avaliados:
+     - SVR: mse=10610.7221, r2=-0.0064
+     - XGBoost: mse=15928.2725, r2=-0.5107
+     - RandomForest: mse=12153.1054, r2=-0.1526
+     - GradientBoosting: mse=12089.0250, r2=-0.1466
+     - DecisionTree: mse=25053.8550, r2=-1.3762
+   ⭐ Melhor: SVR
+
+📌 S07_MAINTENANCE_DECISION_TREE
+   Timestamp: 2025-12-09T15:25:00.289170
+
+📌 S08_MAINTENANCE_RANDOM_FOREST
+   Timestamp: 2025-12-09T15:25:05.755265
+
+📌 S09_MAINTENANCE_ENSEMBLE
+   Timestamp: 2025-12-09T15:26:00.240530
+   Modelos avaliados:
+     - SVM: mse=10661.1326, r2=-0.0111
+     - RandomForest: mse=11005.2871, r2=-0.0438
+     - GradientBoosting: mse=10696.6941, r2=-0.0145
+   ⭐ Melhor: SVM
+
+📌 S10_MAINTENANCE_XGBOOST
+   Timestamp: 2025-12-09T15:26:11.019412
+   Modelos avaliados:
+     - SVM: mse=10661.1326, r2=-0.0111
+     - RandomForest: mse=11005.2871, r2=-0.0438
+     - XGBoost: mse=10591.8926, r2=-0.0046
+   ⭐ Melhor: XGBoost
+
+📌 S11_MAINTENANCE_XGBOOST_BAYES
+   Timestamp: 2025-12-09T15:26:13.659557
+
+----------------------------------------------------------------------
+SUMÁRIO
+----------------------------------------------------------------------
+Melhor modelo geral: Lasso (s02_regression_linear)
+MSE: 0.0846
+
+======================================================================
