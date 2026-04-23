@@ -1,0 +1,90 @@
+# Pipeline SABO — execução 20260423_121925
+# Início: 2026-04-23T12:19:25.873684
+# Comando: run_pipeline.py --step 3
+
+Log desta execução: history/logs/run_20260423_121925.log
+
+======================================================================
+ETAPA 3: ANÁLISE EXPLORATÓRIA (EDA)
+Descrição: Estatísticas, Gráficos, Correlação
+Entradas:  data_preprocessed.csv
+Saídas:    data_eda.csv, eda_report.txt, eda_plots/
+======================================================================
+============================================================
+ETAPA 3: ANÁLISE EXPLORATÓRIA DE DADOS (EDA)
+(Conforme fluxos.drawio)
+============================================================
+
+[1/5] Carregando dados pré-processados...
+  Carregado: 41077 registros, 95 colunas
+
+----------------------------------------
+CÁLCULO DE ESTATÍSTICAS
+----------------------------------------
+
+[2/5] Média, Desvio Padrão, Quartis...
+
+  Calculando estatísticas descritivas...
+  ✓ Estatísticas calculadas para 29 colunas numéricas
+
+----------------------------------------
+GRÁFICOS DE DISTRIBUIÇÃO
+----------------------------------------
+
+[3/5] Histogramas e Boxplots...
+
+  Gerando histogramas...
+  ✓ Histogramas salvos: eda_plots/histogramas.png
+
+  Gerando boxplots...
+  ✓ Boxplots salvos: eda_plots/boxplots.png
+
+----------------------------------------
+ANÁLISE DE CORRELAÇÃO
+----------------------------------------
+
+[4/5] Heatmaps e Dispersão...
+
+  Calculando matriz de correlação...
+
+  Top 10 correlações com 'Manutencao':
+    intervalo_manutencao: 0.3952
+    dias_desde_epoch: -0.3377
+    Consumo_de_massa_no_item_em_Kg_100pçs_Acumulado: -0.1928
+    Qtd_Produzida_Acumulado: -0.1193
+    mes: 0.1130
+    dia_do_ano: 0.1067
+    desgaste_fuso: 0.0815
+    fuso_min: -0.0815
+    Qtd_Refugada_Acumulado: -0.0766
+    taxa_desgaste_fuso: -0.0642
+
+  Gerando heatmap de correlação...
+  ✓ Heatmap salvo: eda_plots/heatmap_correlacao.png
+
+  Gerando gráficos de dispersão...
+  ✓ Dispersão salvo: eda_plots/dispersao_target.png
+
+----------------------------------------
+INSIGHTS
+----------------------------------------
+
+[5/5] Gerando insights automáticos...
+  1. Dataset contém 41077 registros e 95 features.
+  2. Variável target 'Manutencao': média de 250.0 dias, variando de 0 a 975 dias.
+  3. Atenção: 9 colunas com >5% de outliers: Qtd_Produzida, Qtd_Refugada, Fator_Un, Consumo_de_massa_no_item_em_Kg_100pçs, Qtd_Produzida_Acumulado
+  ✓ Relatório salvo: eda_report.txt
+
+============================================================
+ETAPA 3 CONCLUÍDA
+============================================================
+
+Arquivos gerados:
+  - data_eda.csv (dados para modelagem)
+  - eda_report.txt (relatório estatístico)
+  - 4 gráficos em eda_plots/
+
+📊 Histórico registrado para: s03_eda
+📄 Relatório salvo: history/reports/report_20260423_121925.txt
+
+✅ Execução salva: history/runs/run_20260423_121925.json

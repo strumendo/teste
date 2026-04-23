@@ -949,6 +949,108 @@ def calculate_maintenance_days(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def add_maintenance_history_features(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Adiciona features baseadas no histórico de manutenção por equipamento.
+
+    Features criadas:
+    - dias_desde_ultima_manutencao: prod_date - data_ultima_manutencao (pode ser
+      negativo para registros anteriores à última manutenção conhecida)
+    - dias_desde_penultima_manutencao: prod_date - data_penultima_manutencao
+
+    NOTA: o target 'Manutencao' é derivado de (ultima + intervalo - prod_date),
+    então 'dias_desde_ultima_manutencao' tem relação quase-linear com o target
+    condicionada ao equipamento. É uma feature legítima (só usa passado
+    conhecido), mas próxima de ser leaky se combinada com o intervalo médio.
+    """
+    _, _, equip_medicoes = load_full_maintenance_data()
+
+    if not equip_medicoes:
+        print("  ⚠ Sem dados de manutenção; features de histórico não criadas")
+        return df
+
+    equip_col = None
+    for col in ["Equipamento", "Cod Recurso"]:
+        if col in df.columns:
+            equip_col = col
+            break
+    if equip_col is None:
+        print("  ⚠ Coluna de equipamento não encontrada; features de histórico não criadas")
+        return df
+
+    date_col = None
+    for col in ["Data de Produção", "Data de Produção Acumulada"]:
+        if col in df.columns:
+            date_col = col
+            break
+    if date_col is None:
+        print("  ⚠ Coluna de data não encontrada; features de histórico não criadas")
+        return df
+
+    prod_dates = pd.to_datetime(df[date_col], errors='coerce')
+
+    last_map = {e: m.get("data_ultima_manutencao") for e, m in equip_medicoes.items()}
+    pen_map = {e: m.get("data_penultima_manutencao") for e, m in equip_medicoes.items()}
+
+    last_series = pd.to_datetime(df[equip_col].map(last_map), errors='coerce')
+    pen_series = pd.to_datetime(df[equip_col].map(pen_map), errors='coerce')
+
+    df["dias_desde_ultima_manutencao"] = (prod_dates - last_series).dt.days
+    df["dias_desde_penultima_manutencao"] = (prod_dates - pen_series).dt.days
+
+    for col in ["dias_desde_ultima_manutencao", "dias_desde_penultima_manutencao"]:
+        med = df[col].median()
+        df[col] = df[col].fillna(med if pd.notna(med) else 0).astype(int)
+
+    print(f"  ✓ Adicionadas 2 features de histórico de manutenção")
+    return df
+
+
+def add_date_features(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Deriva features numéricas da Data_de_Produção.
+
+    O target 'Manutencao' é função quase-linear da data por equipamento, mas
+    a própria coluna de data é datetime e é descartada pelo filtro numérico
+    do s04. Estas features resolvem isso sem vazar o target.
+
+    Features criadas:
+    - dias_desde_epoch: dias desde a data mínima do dataset
+    - mes: mês (1-12)
+    - dia_semana: dia da semana (0=seg ... 6=dom)
+    - dia_do_ano: dia do ano (1-366)
+    """
+    date_col = None
+    for col in ["Data de Produção", "Data de Produção Acumulada"]:
+        if col in df.columns:
+            date_col = col
+            break
+
+    if date_col is None:
+        print("  ⚠ Coluna de data não encontrada; features de data não criadas")
+        return df
+
+    dates = pd.to_datetime(df[date_col], errors='coerce')
+    valid = dates.notna()
+    if valid.sum() == 0:
+        print("  ⚠ Nenhuma data válida; features de data não criadas")
+        return df
+
+    data_min = dates[valid].min()
+    df["dias_desde_epoch"] = (dates - data_min).dt.days
+    df["mes"] = dates.dt.month
+    df["dia_semana"] = dates.dt.dayofweek
+    df["dia_do_ano"] = dates.dt.dayofyear
+
+    # Preencher NaNs deixados por datas inválidas com a mediana (coerente com handle_null_values)
+    for col in ["dias_desde_epoch", "mes", "dia_semana", "dia_do_ano"]:
+        med = df[col].median()
+        df[col] = df[col].fillna(med if pd.notna(med) else 0).astype(int)
+
+    print(f"  ✓ Adicionadas 4 features de data (ref mínima: {data_min.date()})")
+    return df
+
+
 def generate_cumulative_variables(df: pd.DataFrame) -> pd.DataFrame:
     """
     Gera variáveis acumulativas por equipamento.
@@ -1043,6 +1145,87 @@ def apply_one_hot_encoding(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def aggregate_by_day_equipment(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Agrega múltiplas ordens do mesmo dia e equipamento em uma única linha.
+
+    Motivo: o target 'Manutencao' é constante dentro de cada (data, equipamento).
+    Múltiplas ordens de produção no mesmo dia-equipamento compartilham exatamente
+    o mesmo valor de target mas diferem em features intra-dia (Qtd_Produzida,
+    Qtd_Refugada, produto, etc.). Essa variação é ruído irredutível para este
+    target. Agregar reduz o ruído e alinha features com a granularidade real do
+    target.
+
+    Regras de agregação (por semântica):
+    - sum: quantidades produzidas/refugadas/retrabalhadas (somatório do dia)
+    - mean: taxas/unidades (Fator_Un, Consumo_de_massa, desgaste_por_1000_pecas)
+    - max: acumulados (monotônicos no dia → last = max)
+    - max: OHE de produto/massa/unidade (booleano "qualquer ocorrência no dia")
+    - first: constantes por equipamento (medições, desgaste, OHE de Equipamento)
+             e por dia (features de data, histórico, target)
+    - drop: metadados de linha (Cód_Ordem, Cód_Recurso texto, Cód_Produto texto,
+            Fonte_Dados, Unnamed:_9) — não úteis como feature e atrapalham o agg
+    """
+    date_col = next(
+        (c for c in ["Data_de_Produção", "Data_de_Produção_Acumulada"] if c in df.columns),
+        None,
+    )
+    if date_col is None:
+        print("  ⚠ Coluna de data não encontrada; agregação não aplicada")
+        return df
+
+    equip_ohe_cols = [c for c in df.columns if c.startswith("Equipamento_")]
+    if not equip_ohe_cols:
+        print("  ⚠ Sem colunas OHE de equipamento; agregação não aplicada")
+        return df
+
+    df = df.copy()
+    df["_equip_id"] = df[equip_ohe_cols].idxmax(axis=1)
+
+    initial = len(df)
+
+    drop_cols = {"Cód_Ordem", "Cód_Recurso", "Cód_Produto", "Fonte_Dados", "Unnamed:_9"}
+    df = df.drop(columns=[c for c in drop_cols if c in df.columns])
+
+    sum_cols = {"Qtd_Produzida", "Qtd_Refugada", "Qtd_Retrabalhada"}
+    mean_cols = {
+        "Fator_Un",
+        "Consumo_de_massa_no_item_em_Kg_100pçs",
+        "desgaste_por_1000_pecas",
+    }
+    max_cols = {
+        "Qtd_Produzida_Acumulado",
+        "Qtd_Refugada_Acumulado",
+        "Qtd_Retrabalhada_Acumulado",
+        "Consumo_de_massa_no_item_em_Kg_100pçs_Acumulado",
+    }
+    ohe_value_prefixes = ("Descrição_da_massa_", "Cód_Un_", "Cod_Produto_", "Cód_Produto_")
+
+    agg_rules = {}
+    for col in df.columns:
+        if col in {date_col, "_equip_id"}:
+            continue
+        if col in sum_cols:
+            agg_rules[col] = "sum"
+        elif col in mean_cols:
+            agg_rules[col] = "mean"
+        elif col in max_cols:
+            agg_rules[col] = "max"
+        elif col.startswith(ohe_value_prefixes):
+            agg_rules[col] = "max"
+        else:
+            agg_rules[col] = "first"
+
+    grouped = df.groupby([date_col, "_equip_id"], as_index=False, sort=False).agg(agg_rules)
+    grouped = grouped.drop(columns=["_equip_id"])
+
+    final = len(grouped)
+    reduction = (1 - final / initial) * 100 if initial else 0.0
+    print(f"  ✓ Agregação dia-equipamento: {initial} → {final} linhas ({reduction:.1f}% redução)")
+
+    return grouped
+
+
 def clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
     """
     Padroniza nomes das colunas.
@@ -1120,17 +1303,26 @@ def main(inicio=None, fim=None, **kwargs) -> dict:
     print("ENGENHARIA DE FEATURES")
     print("-" * 40)
 
+    print("\n[4.2] Derivando features de data...")
+    df = add_date_features(df)
+
     print("\n[5/7] Gerando variáveis acumulativas...")
     df = generate_cumulative_variables(df)
 
     print("\n[6/7] Adicionando medições de desgaste...")
     df = add_measurement_features(df)
 
+    print("\n[6.1] Derivando features do histórico de manutenção...")
+    df = add_maintenance_history_features(df)
+
     print("\n[7/8] Aplicando One-Hot Encoding...")
     df = apply_one_hot_encoding(df)
 
     # Limpar nomes de colunas
     df = clean_column_names(df)
+
+    print("\n[7.1] Agregando ao grão dia-equipamento...")
+    df = aggregate_by_day_equipment(df)
 
     # Calcular estatísticas por equipamento (antes de limpar nomes)
     print("\n[8/8] Calculando estatísticas por equipamento...")

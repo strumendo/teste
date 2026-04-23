@@ -1,0 +1,56 @@
+======================================================================
+RELATÓRIO DE EXECUÇÃO - 20260423_143357
+======================================================================
+Data/Hora: 2026-04-23T14:33:57.293779
+Total de passos: 10
+
+----------------------------------------------------------------------
+RESULTADOS POR PASSO
+----------------------------------------------------------------------
+
+📌 S00_SPLIT_UNIFIED
+   Timestamp: 2026-04-23T14:33:57.296512
+
+📌 S01_DATA_COLLECTION
+   Timestamp: 2026-04-23T14:33:58.089100
+
+📌 S02_PREPROCESSING
+   Timestamp: 2026-04-23T14:34:47.847153
+
+📌 S03_EDA
+   Timestamp: 2026-04-23T14:34:53.416514
+
+📌 S03B_ADVANCED_EDA
+   Timestamp: 2026-04-23T14:36:10.033524
+
+📌 S04_MODELING
+   Timestamp: 2026-04-23T14:36:11.684913
+
+📌 S05_EVALUATION
+   Timestamp: 2026-04-23T14:36:11.784454
+   Modelos avaliados:
+     - linear: mse=18259.9459, r2=0.2921
+     - decision_tree: mse=9360.5366, r2=0.6371
+     - xgboost: mse=4715.3960, r2=0.8172
+     - random_forest: mse=7342.1223, r2=0.7154
+   ⭐ Melhor: xgboost
+
+📌 S06_GENERATE_REPORT
+   Timestamp: 2026-04-23T14:36:18.814936
+   Modelos avaliados:
+     - best_metrics: mse=4715.3960, r2=0.8172
+   ⭐ Melhor: best_metrics
+
+📌 S07_HIST_MANUTENCAO
+   Timestamp: 2026-04-23T14:36:19.268060
+
+📌 S08_PRESCRICAO_MANUTENCAO
+   Timestamp: 2026-04-23T14:36:19.375201
+
+----------------------------------------------------------------------
+SUMÁRIO
+----------------------------------------------------------------------
+Melhor modelo geral: xgboost (s05_evaluation)
+MSE: 4715.3960
+
+======================================================================

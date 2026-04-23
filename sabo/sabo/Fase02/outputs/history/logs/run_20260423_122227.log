@@ -1,0 +1,211 @@
+# Pipeline SABO — execução 20260423_122227
+# Início: 2026-04-23T12:22:27.961103
+# Comando: run_pipeline.py --step 2
+
+Log desta execução: history/logs/run_20260423_122227.log
+
+======================================================================
+ETAPA 2: PRÉ-PROCESSAMENTO E LIMPEZA
+Descrição: Higienização + Engenharia de Features
+Entradas:  data_raw.csv
+Saídas:    data_preprocessed.csv
+======================================================================
+============================================================
+ETAPA 2: PRÉ-PROCESSAMENTO E LIMPEZA
+(Conforme fluxos.drawio)
+============================================================
+
+[1/6] Carregando dados brutos...
+  Carregado: 42676 registros, 15 colunas
+
+----------------------------------------
+HIGIENIZAÇÃO E TRANSFORMAÇÃO
+----------------------------------------
+
+[2/6] Removendo duplicadas...
+  ✓ Nenhuma duplicata encontrada
+
+[3/6] Tratando valores nulos...
+  Tratando 131244 valores nulos...
+    Descrição da massa (Composto): preenchido com moda (P250/14)
+    Consumo de massa no item em (Kg/100pçs): preenchido com mediana (0.79)
+    Unnamed: 9: preenchido com moda (N146/9)
+    Unnamed: 10: preenchido com mediana (1.47)
+    Fonte_Dados: preenchido com moda (IJ-138.2.xlsx)
+  ✓ Valores nulos tratados
+
+[4/6] Convertendo datas...
+
+[4.1] Calculando dias até manutenção...
+  📋 Carregando dados de manutenção (2 arquivo(s)):
+      - Dados Manut - 27 Equip - 2025.xlsx
+      - Dados Manut - 27 Equip - 2026.xlsx
+    ✓ Carregados 28 equipamentos (todos os arquivos unidos)
+    ✓ Equipamentos com medições: 23
+/home/strumendo/PycharmProjects/teste/sabo/sabo/Fase02/scripts/s02_preprocessing.py:918: UserWarning: Parsing dates in %Y-%m-%d format when dayfirst=True was specified. Pass `dayfirst=False` or specify a format to silence this warning.
+  prod_date = pd.to_datetime(row[date_col], dayfirst=True, errors='coerce')
+  ✓ Removidos 1599 registros pós-manutenção
+  ✓ Calculada variável 'Manutencao' (dias até manutenção)
+
+----------------------------------------
+ENGENHARIA DE FEATURES
+----------------------------------------
+
+[4.2] Derivando features de data...
+  ✓ Adicionadas 4 features de data (ref mínima: 2023-03-19)
+
+[5/7] Gerando variáveis acumulativas...
+  ✓ Criada variável acumulativa: Qtd. Produzida_Acumulado
+  ✓ Criada variável acumulativa: Qtd. Refugada_Acumulado
+  ✓ Criada variável acumulativa: Qtd. Retrabalhada_Acumulado
+  ✓ Criada variável acumulativa: Consumo de massa no item em (Kg/100pçs)_Acumulado
+
+[6/7] Adicionando medições de desgaste...
+  Adicionando features de medições de desgaste...
+  ✓ Adicionadas 13 features de medição/desgaste
+
+[6.1] Derivando features do histórico de manutenção...
+  ✓ Adicionadas 2 features de histórico de manutenção
+
+[7/8] Aplicando One-Hot Encoding...
+  ✓ One-Hot Encoding aplicado: Equipamento (26 categorias)
+  ✓ One-Hot Encoding aplicado: Descrição da massa (Composto) (34 categorias)
+  ✓ One-Hot Encoding aplicado: Cód. Un. (1 categorias)
+
+[8/8] Calculando estatísticas por equipamento...
+  Carregado: 42676 registros, 15 colunas
+  ✓ Nenhuma duplicata encontrada
+  Tratando 131244 valores nulos...
+    Descrição da massa (Composto): preenchido com moda (P250/14)
+    Consumo de massa no item em (Kg/100pçs): preenchido com mediana (0.79)
+    Unnamed: 9: preenchido com moda (N146/9)
+    Unnamed: 10: preenchido com mediana (1.47)
+    Fonte_Dados: preenchido com moda (IJ-138.2.xlsx)
+  ✓ Valores nulos tratados
+/home/strumendo/PycharmProjects/teste/sabo/sabo/Fase02/scripts/s02_preprocessing.py:918: UserWarning: Parsing dates in %Y-%m-%d format when dayfirst=True was specified. Pass `dayfirst=False` or specify a format to silence this warning.
+  prod_date = pd.to_datetime(row[date_col], dayfirst=True, errors='coerce')
+  ✓ Removidos 1599 registros pós-manutenção
+  ✓ Calculada variável 'Manutencao' (dias até manutenção)
+  ✓ Criada variável acumulativa: Qtd. Produzida_Acumulado
+  ✓ Criada variável acumulativa: Qtd. Refugada_Acumulado
+  ✓ Criada variável acumulativa: Qtd. Retrabalhada_Acumulado
+  ✓ Criada variável acumulativa: Consumo de massa no item em (Kg/100pçs)_Acumulado
+  Adicionando features de medições de desgaste...
+  ✓ Adicionadas 13 features de medição/desgaste
+  Calculando estatísticas por equipamento...
+  ✓ Estatísticas calculadas para 26 equipamentos
+  ✓ Estatísticas salvas em: equipment_stats.csv
+/home/strumendo/PycharmProjects/teste/sabo/sabo/Fase02/scripts/s02_preprocessing.py:752: UserWarning: DataFrame columns are not unique, some columns will be omitted.
+  stats_dict = stats.to_dict(orient="records")
+  ✓ Estatísticas salvas em: equipment_stats.json
+
+============================================================
+ETAPA 2 CONCLUÍDA
+============================================================
+
+Transformação: (42676, 15) → (41077, 97)
+Arquivo salvo: data_preprocessed.csv
+
+Colunas (97):
+   1. Data_de_Produção
+   2. Cód_Ordem
+   3. Cód_Recurso
+   4. Cód_Produto
+   5. Qtd_Produzida
+   6. Qtd_Refugada
+   7. Qtd_Retrabalhada
+   8. Fator_Un
+   9. Consumo_de_massa_no_item_em_Kg_100pçs
+  10. Unnamed:_9
+  11. Unnamed:_10
+  12. Fonte_Dados
+  13. Manutencao
+  14. dias_desde_epoch
+  15. mes
+  16. dia_semana
+  17. dia_do_ano
+  18. Qtd_Produzida_Acumulado
+  19. Qtd_Refugada_Acumulado
+  20. Qtd_Retrabalhada_Acumulado
+  21. Consumo_de_massa_no_item_em_Kg_100pçs_Acumulado
+  22. cilindro_max
+  23. cilindro_min
+  24. cilindro_variacao
+  25. desgaste_cilindro
+  26. fuso_max
+  27. fuso_min
+  28. fuso_variacao
+  29. desgaste_fuso
+  30. intervalo_manutencao
+  31. taxa_desgaste_cilindro
+  32. taxa_desgaste_fuso
+  33. indice_desgaste
+  34. desgaste_por_1000_pecas
+  35. dias_desde_ultima_manutencao
+  36. dias_desde_penultima_manutencao
+  37. Equipamento_IJ_044
+  38. Equipamento_IJ_046
+  39. Equipamento_IJ_117
+  40. Equipamento_IJ_118
+  41. Equipamento_IJ_119
+  42. Equipamento_IJ_120
+  43. Equipamento_IJ_121
+  44. Equipamento_IJ_122
+  45. Equipamento_IJ_123
+  46. Equipamento_IJ_124
+  47. Equipamento_IJ_125
+  48. Equipamento_IJ_129
+  49. Equipamento_IJ_130
+  50. Equipamento_IJ_131
+  51. Equipamento_IJ_132
+  52. Equipamento_IJ_133
+  53. Equipamento_IJ_134
+  54. Equipamento_IJ_135
+  55. Equipamento_IJ_136
+  56. Equipamento_IJ_137
+  57. Equipamento_IJ_138
+  58. Equipamento_IJ_139
+  59. Equipamento_IJ_151
+  60. Equipamento_IJ_152
+  61. Equipamento_IJ_156
+  62. Equipamento_IJ_164
+  63. Descrição_da_massa_Composto_EP_4053_1
+  64. Descrição_da_massa_Composto_F424_40_MARROM
+  65. Descrição_da_massa_Composto_F424_50
+  66. Descrição_da_massa_Composto_F424_51
+  67. Descrição_da_massa_Composto_F424_64
+  68. Descrição_da_massa_Composto_F424_85
+  69. Descrição_da_massa_Composto_F444_1
+  70. Descrição_da_massa_Composto_FP75614_49
+  71. Descrição_da_massa_Composto_MASSA_F403_32
+  72. Descrição_da_massa_Composto_MASSA_F420_134
+  73. Descrição_da_massa_Composto_MASSA_F420_191
+  74. Descrição_da_massa_Composto_MASSA_F420_201
+  75. Descrição_da_massa_Composto_MASSA_F420_306
+  76. Descrição_da_massa_Composto_MASSA_F420_95
+  77. Descrição_da_massa_Composto_MASSA_F420_96
+  78. Descrição_da_massa_Composto_MASSA_S315_1_DIAM_CORDÃO_8MM_SEM_R_0345
+  79. Descrição_da_massa_Composto_MASSA_S315_10_MACARRÃO_EXTR__8+___1mm
+  80. Descrição_da_massa_Composto_MASSA_S316_2
+  81. Descrição_da_massa_Composto_N_110_2
+  82. Descrição_da_massa_Composto_N_126_2
+  83. Descrição_da_massa_Composto_N_142_44
+  84. Descrição_da_massa_Composto_N_142_67
+  85. Descrição_da_massa_Composto_N_158_3
+  86. Descrição_da_massa_Composto_N_184_2
+  87. Descrição_da_massa_Composto_N144_83
+  88. Descrição_da_massa_Composto_N144_85
+  89. Descrição_da_massa_Composto_N146_9
+  90. Descrição_da_massa_Composto_N148_18
+  91. Descrição_da_massa_Composto_N190_30
+  92. Descrição_da_massa_Composto_P_210_1
+  93. Descrição_da_massa_Composto_P212_1
+  94. Descrição_da_massa_Composto_P248_40
+  95. Descrição_da_massa_Composto_P250_14
+  96. Descrição_da_massa_Composto_RC_21_65
+  97. Cód_Un_PC
+
+📊 Histórico registrado para: s02_preprocessing
+📄 Relatório salvo: history/reports/report_20260423_122227.txt
+
+✅ Execução salva: history/runs/run_20260423_122227.json

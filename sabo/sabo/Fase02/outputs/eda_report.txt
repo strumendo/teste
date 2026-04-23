@@ -4,44 +4,35 @@ RELATÓRIO DE ANÁLISE EXPLORATÓRIA (EDA)
 
 INSIGHTS PRINCIPAIS
 ----------------------------------------
-1. Dataset contém 41077 registros e 91 features.
-2. Variável target 'Manutencao': média de 250.0 dias, variando de 0 a 975 dias.
-3. Atenção: 9 colunas com >5% de outliers: Qtd_Produzida, Qtd_Refugada, Fator_Un, Consumo_de_massa_no_item_em_Kg_100pçs, Qtd_Produzida_Acumulado
+1. Dataset contém 13874 registros e 92 features.
+2. Variável target 'Manutencao': média de 252.3 dias, variando de 0 a 975 dias.
+3. Atenção: 10 colunas com >5% de outliers: Qtd_Produzida, Qtd_Refugada, Fator_Un, Consumo_de_massa_no_item_em_Kg_100pçs, Qtd_Produzida_Acumulado
 
 ======================================================================
 ESTATÍSTICAS DESCRITIVAS
 ======================================================================
 
-Cód_Ordem:
-  Média:    8764494.0685
-  Desvio:   707406756.0741
-  Mínimo:   2615824.0000
-  Q1 (25%): 2707182.0000
-  Mediana:  2719191.0000
-  Q3 (75%): 2730871.0000
-  Máximo:   82781401001.0000
-
 Qtd_Produzida:
-  Média:    473.6308
-  Desvio:   1047.0767
-  Mínimo:   -191.0000
-  Q1 (25%): 127.0000
-  Mediana:  287.0000
-  Q3 (75%): 457.0000
-  Máximo:   41580.0000
+  Média:    1402.2871
+  Desvio:   2615.1844
+  Mínimo:   -115.0000
+  Q1 (25%): 453.0000
+  Mediana:  909.0000
+  Q3 (75%): 1317.0000
+  Máximo:   74645.0000
 
 Qtd_Refugada:
-  Média:    6.5850
-  Desvio:   18.2963
-  Mínimo:   -5.0000
+  Média:    19.4964
+  Desvio:   34.8418
+  Mínimo:   0.0000
   Q1 (25%): 0.0000
-  Mediana:  0.0000
-  Q3 (75%): 7.0000
+  Mediana:  8.0000
+  Q3 (75%): 25.0000
   Máximo:   504.0000
 
 Qtd_Retrabalhada:
-  Média:    0.0013
-  Desvio:   0.1341
+  Média:    0.0038
+  Desvio:   0.2308
   Mínimo:   -4.0000
   Q1 (25%): 0.0000
   Mediana:  0.0000
@@ -49,26 +40,26 @@ Qtd_Retrabalhada:
   Máximo:   22.0000
 
 Fator_Un:
-  Média:    2.3791
-  Desvio:   4.9964
+  Média:    2.5936
+  Desvio:   4.9622
   Mínimo:   1.0000
   Q1 (25%): 1.0000
   Mediana:  1.0000
-  Q3 (75%): 1.0000
+  Q3 (75%): 2.0000
   Máximo:   123.0000
 
 Consumo_de_massa_no_item_em_Kg_100pçs:
-  Média:    1.2863
-  Desvio:   1.3767
+  Média:    1.2873
+  Desvio:   1.3554
   Mínimo:   0.0000
   Q1 (25%): 0.4800
   Mediana:  0.7920
-  Q3 (75%): 1.6000
+  Q3 (75%): 1.6394
   Máximo:   12.1960
 
 Unnamed:_10:
-  Média:    1.4710
-  Desvio:   0.0822
+  Média:    1.4712
+  Desvio:   0.0823
   Mínimo:   0.3950
   Q1 (25%): 1.4700
   Mediana:  1.4700
@@ -76,35 +67,71 @@ Unnamed:_10:
   Máximo:   6.0000
 
 Manutencao:
-  Média:    249.9883
-  Desvio:   160.5588
+  Média:    252.2606
+  Desvio:   161.2525
   Mínimo:   0.0000
-  Q1 (25%): 123.0000
-  Mediana:  235.0000
-  Q3 (75%): 355.0000
+  Q1 (25%): 125.0000
+  Mediana:  238.0000
+  Q3 (75%): 358.0000
   Máximo:   975.0000
 
+dias_desde_epoch:
+  Média:    735.4838
+  Desvio:   205.8575
+  Mínimo:   0.0000
+  Q1 (25%): 573.0000
+  Mediana:  739.0000
+  Q3 (75%): 900.0000
+  Máximo:   1108.0000
+
+mes:
+  Média:    6.8057
+  Desvio:   3.3796
+  Mínimo:   1.0000
+  Q1 (25%): 4.0000
+  Mediana:  7.0000
+  Q3 (75%): 10.0000
+  Máximo:   12.0000
+
+dia_semana:
+  Média:    2.8027
+  Desvio:   1.9687
+  Mínimo:   0.0000
+  Q1 (25%): 1.0000
+  Mediana:  3.0000
+  Q3 (75%): 4.0000
+  Máximo:   6.0000
+
+dia_do_ano:
+  Média:    191.8711
+  Desvio:   102.9723
+  Mínimo:   1.0000
+  Q1 (25%): 101.0000
+  Mediana:  201.0000
+  Q3 (75%): 279.0000
+  Máximo:   364.0000
+
 Qtd_Produzida_Acumulado:
-  Média:    351612.4564
-  Desvio:   421815.3262
-  Mínimo:   3.0000
-  Q1 (25%): 118791.0000
-  Mediana:  254155.0000
-  Q3 (75%): 433543.0000
+  Média:    370221.6458
+  Desvio:   471222.5362
+  Mínimo:   134.0000
+  Q1 (25%): 118100.7500
+  Mediana:  253727.0000
+  Q3 (75%): 437305.2500
   Máximo:   3979928.0000
 
 Qtd_Refugada_Acumulado:
-  Média:    6278.3075
-  Desvio:   5638.0634
+  Média:    6408.1727
+  Desvio:   5964.2330
   Mínimo:   0.0000
-  Q1 (25%): 2244.0000
-  Mediana:  5244.0000
-  Q3 (75%): 8417.6000
+  Q1 (25%): 2203.2500
+  Mediana:  5190.0000
+  Q3 (75%): 8477.0000
   Máximo:   41409.0000
 
 Qtd_Retrabalhada_Acumulado:
-  Média:    0.6997
-  Desvio:   3.0426
+  Média:    0.7314
+  Desvio:   3.1662
   Mínimo:   -4.0000
   Q1 (25%): 0.0000
   Mediana:  0.0000
@@ -112,17 +139,17 @@ Qtd_Retrabalhada_Acumulado:
   Máximo:   22.0000
 
 Consumo_de_massa_no_item_em_Kg_100pçs_Acumulado:
-  Média:    1085.4890
-  Desvio:   979.4742
+  Média:    1068.8404
+  Desvio:   996.2616
   Mínimo:   0.0000
-  Q1 (25%): 326.1810
-  Mediana:  840.6260
-  Q3 (75%): 1606.8960
+  Q1 (25%): 304.2622
+  Mediana:  795.2375
+  Q3 (75%): 1582.0287
   Máximo:   5829.6270
 
 cilindro_max:
-  Média:    20.1992
-  Desvio:   0.2106
+  Média:    20.1945
+  Desvio:   0.2104
   Mínimo:   20.0000
   Q1 (25%): 20.0600
   Mediana:  20.0800
@@ -130,8 +157,8 @@ cilindro_max:
   Máximo:   20.6000
 
 cilindro_min:
-  Média:    20.0399
-  Desvio:   0.0595
+  Média:    20.0387
+  Desvio:   0.0583
   Mínimo:   20.0000
   Q1 (25%): 20.0200
   Mediana:  20.0200
@@ -139,8 +166,8 @@ cilindro_min:
   Máximo:   20.3000
 
 cilindro_variacao:
-  Média:    0.1593
-  Desvio:   0.1874
+  Média:    0.1557
+  Desvio:   0.1877
   Mínimo:   0.0000
   Q1 (25%): 0.0350
   Mediana:  0.0600
@@ -148,8 +175,8 @@ cilindro_variacao:
   Máximo:   0.5500
 
 desgaste_cilindro:
-  Média:    0.1992
-  Desvio:   0.2106
+  Média:    0.1945
+  Desvio:   0.2104
   Mínimo:   0.0000
   Q1 (25%): 0.0600
   Mediana:  0.0800
@@ -157,8 +184,8 @@ desgaste_cilindro:
   Máximo:   0.6000
 
 fuso_max:
-  Média:    19.7096
-  Desvio:   0.2183
+  Média:    19.7075
+  Desvio:   0.2241
   Mínimo:   19.0100
   Q1 (25%): 19.7400
   Mediana:  19.8000
@@ -166,17 +193,17 @@ fuso_max:
   Máximo:   20.0800
 
 fuso_min:
-  Média:    19.1832
-  Desvio:   0.5064
+  Média:    19.1947
+  Desvio:   0.5118
   Mínimo:   17.9500
   Q1 (25%): 18.8300
   Mediana:  19.3100
-  Q3 (75%): 19.4900
+  Q3 (75%): 19.5200
   Máximo:   20.0400
 
 fuso_variacao:
-  Média:    0.4724
-  Desvio:   0.4474
+  Média:    0.4589
+  Desvio:   0.4398
   Mínimo:   0.0300
   Q1 (25%): 0.2100
   Mediana:  0.3100
@@ -184,20 +211,20 @@ fuso_variacao:
   Máximo:   1.7900
 
 desgaste_fuso:
-  Média:    0.8168
-  Desvio:   0.5064
+  Média:    0.8053
+  Desvio:   0.5118
   Mínimo:   -0.0400
-  Q1 (25%): 0.5100
+  Q1 (25%): 0.4800
   Mediana:  0.6900
   Q3 (75%): 1.1700
   Máximo:   2.0500
 
 intervalo_manutencao:
-  Média:    451.3198
-  Desvio:   73.8680
+  Média:    454.1927
+  Desvio:   73.1353
   Mínimo:   332.0000
-  Q1 (25%): 384.0000
-  Mediana:  448.0000
+  Q1 (25%): 385.0000
+  Mediana:  490.0000
   Q3 (75%): 526.0000
   Máximo:   569.0000
 
@@ -211,7 +238,7 @@ taxa_desgaste_cilindro:
   Máximo:   0.0013
 
 taxa_desgaste_fuso:
-  Média:    0.0014
+  Média:    0.0013
   Desvio:   0.0014
   Mínimo:   -0.0001
   Q1 (25%): 0.0000
@@ -220,8 +247,8 @@ taxa_desgaste_fuso:
   Máximo:   0.0039
 
 indice_desgaste:
-  Média:    30.3097
-  Desvio:   33.2206
+  Média:    29.6233
+  Desvio:   33.2786
   Mínimo:   0.0000
   Q1 (25%): 3.4000
   Mediana:  15.2000
@@ -229,10 +256,28 @@ indice_desgaste:
   Máximo:   98.0000
 
 desgaste_por_1000_pecas:
-  Média:    19.7658
-  Desvio:   125.8121
+  Média:    19.1842
+  Desvio:   87.3295
   Mínimo:   0.0000
-  Q1 (25%): 0.1471
-  Mediana:  1.3870
-  Q3 (75%): 5.7718
+  Q1 (25%): 0.1899
+  Mediana:  1.8060
+  Q3 (75%): 9.3288
   Máximo:   2630.0000
+
+dias_desde_ultima_manutencao:
+  Média:    -67.8702
+  Desvio:   227.7466
+  Mínimo:   -902.0000
+  Q1 (25%): -221.0000
+  Mediana:  -57.0000
+  Q3 (75%): 108.0000
+  Máximo:   437.0000
+
+dias_desde_penultima_manutencao:
+  Média:    386.3225
+  Desvio:   208.0202
+  Mínimo:   -363.0000
+  Q1 (25%): 226.0000
+  Mediana:  393.0000
+  Q3 (75%): 553.0000
+  Máximo:   832.0000

@@ -1,0 +1,87 @@
+# Pipeline SABO — execução 20260423_133802
+# Início: 2026-04-23T13:38:02.878215
+# Comando: run_pipeline.py --step 4
+
+Log desta execução: history/logs/run_20260423_133802.log
+
+======================================================================
+ETAPA 4: MODELAGEM E TREINAMENTO
+Descrição: 4 Algoritmos: LR, DT, RF, XGBoost
+Entradas:  data_eda.csv
+Saídas:    models/*.joblib, train_test_split.npz
+======================================================================
+============================================================
+ETAPA 4: MODELAGEM E TREINAMENTO
+(Conforme fluxos.drawio)
+============================================================
+
+[1/7] Carregando dados pós-EDA...
+  Carregado: 13874 registros, 92 colunas
+
+[2/7] Preparando features e target...
+  ⚠ Removidas 1 colunas vazias/unnamed: ['Unnamed:_10']
+  ⚠ Removidas 1 features com data leakage: ['intervalo_manutencao']
+  Features: 27
+  Target: Manutencao
+
+----------------------------------------
+DIVISÃO TREINO/TESTE
+----------------------------------------
+
+[3/7] Dividindo dados (80% treino / 20% teste)...
+
+  Divisão Treino/Teste (80%/20%):
+    Treino: 11099 amostras
+    Teste:  2775 amostras
+  ✓ Dados treino/teste salvos: train_test_split.npz
+
+----------------------------------------
+TREINAMENTO DOS MODELOS
+----------------------------------------
+
+[4/7] Treinando Regressão Linear...
+
+  [Algoritmo 1] Regressão Linear...
+    ✓ Modelo treinado
+
+[5/7] Treinando Decision Tree...
+
+  [Algoritmo 2] Decision Tree...
+    ✓ Modelo treinado
+
+[6/7] Treinando Random Forest...
+
+  [Algoritmo 3] Random Forest...
+    ✓ Modelo treinado
+
+[7/7] Treinando XGBoost...
+
+  [Algoritmo 4] XGBoost...
+    ✓ Modelo treinado
+
+----------------------------------------
+SALVANDO MODELOS
+----------------------------------------
+  ✓ Salvo: models/model_linear.joblib
+  ✓ Salvo: models/model_decision_tree.joblib
+  ✓ Salvo: models/model_random_forest.joblib
+  ✓ Salvo: models/model_xgboost.joblib
+
+============================================================
+ETAPA 4 CONCLUÍDA
+============================================================
+
+Modelos treinados: 4
+  - linear
+  - decision_tree
+  - random_forest
+  - xgboost
+
+Arquivos gerados:
+  - models/*.joblib (4 modelos)
+  - train_test_split.npz (dados treino/teste)
+
+📊 Histórico registrado para: s04_modeling
+📄 Relatório salvo: history/reports/report_20260423_133802.txt
+
+✅ Execução salva: history/runs/run_20260423_133802.json

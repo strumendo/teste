@@ -1,0 +1,47 @@
+{
+  "run_id": "20260423_135833",
+  "timestamp": "2026-04-23T13:58:33.762831",
+  "steps": {
+    "s05_evaluation": {
+      "timestamp": "2026-04-23T13:58:34.737863",
+      "models": {
+        "linear": {
+          "mse": 18259.945937917473,
+          "r2": 0.2921155983735516
+        },
+        "decision_tree": {
+          "mse": 9360.536637687694,
+          "r2": 0.6371195238364594
+        },
+        "xgboost": {
+          "mse": 4715.39599609375,
+          "r2": 0.8171979784965515
+        },
+        "random_forest": {
+          "mse": 7342.122307571739,
+          "r2": 0.7153675112711547
+        }
+      },
+      "params": {},
+      "best_model": "xgboost",
+      "best_mse": 4715.39599609375,
+      "best_r2": 0.8171979784965515
+    }
+  },
+  "summary": {
+    "total_steps": 1,
+    "best_models_per_step": {
+      "s05_evaluation": {
+        "model": "xgboost",
+        "mse": 4715.39599609375,
+        "r2": 0.8171979784965515,
+        "accuracy": null
+      }
+    },
+    "overall_best": {
+      "step": "s05_evaluation",
+      "model": "xgboost",
+      "mse": 4715.39599609375
+    }
+  }
+}

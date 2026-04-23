@@ -1,0 +1,111 @@
+# Pipeline SABO — execução 20260423_135225
+# Início: 2026-04-23T13:52:25.895889
+# Comando: run_pipeline.py --step 5
+
+Log desta execução: history/logs/run_20260423_135225.log
+
+======================================================================
+ETAPA 5: VALIDAÇÃO E AVALIAÇÃO
+Descrição: Métricas R², MSE, MAE + Seleção
+Entradas:  models/*.joblib, train_test_split.npz
+Saídas:    best_model.joblib, evaluation_report.txt
+======================================================================
+============================================================
+ETAPA 5: VALIDAÇÃO E AVALIAÇÃO
+(Conforme fluxos.drawio)
+============================================================
+
+[1/5] Carregando dados de teste (20%)...
+  Carregado: 2775 amostras de teste, 16 features
+
+[2/5] Carregando modelos treinados...
+  ✓ Carregado: linear
+  ✓ Carregado: decision_tree
+  ✓ Carregado: xgboost
+  ✓ Carregado: random_forest
+
+----------------------------------------
+TESTE NOS 20% DE DADOS
+----------------------------------------
+
+[3/5] Calculando métricas (R², MSE, MAE)...
+
+  Avaliando linear...
+    R²:   0.2921
+    MSE:  18259.95
+    MAE:  113.25
+    RMSE: 135.13
+
+  Avaliando decision_tree...
+    R²:   0.6371
+    MSE:  9360.54
+    MAE:  70.35
+    RMSE: 96.75
+
+  Avaliando xgboost...
+    R²:   0.8172
+    MSE:  4715.40
+    MAE:  42.37
+    RMSE: 68.67
+
+  Avaliando random_forest...
+    R²:   0.7154
+    MSE:  7342.12
+    MAE:  59.56
+    RMSE: 85.69
+
+----------------------------------------
+COMPARAÇÃO DE DESEMPENHO
+----------------------------------------
+
+============================================================
+RANKING DOS MODELOS (por R²)
+============================================================
+
+Rank   Modelo               R²         MSE          MAE         
+------------------------------------------------------------
+1      xgboost              0.8172     4715.40      42.37        
+2      random_forest        0.7154     7342.12      59.56        
+3      decision_tree        0.6371     9360.54      70.35        
+4      linear               0.2921     18259.95     113.25       
+
+[4/5] Selecionando melhor modelo...
+
+  ★ Melhor modelo: XGBOOST
+    R²:   0.8172
+    MSE:  4715.40
+    MAE:  42.37
+
+============================================================
+RANKING DOS MODELOS (por R²)
+============================================================
+
+Rank   Modelo               R²         MSE          MAE         
+------------------------------------------------------------
+1      xgboost              0.8172     4715.40      42.37        ★ MELHOR
+2      random_forest        0.7154     7342.12      59.56        
+3      decision_tree        0.6371     9360.54      70.35        
+4      linear               0.2921     18259.95     113.25       
+
+[5/5] Salvando resultados...
+  ✓ Melhor modelo salvo: best_model.joblib
+  ✓ Relatório salvo: evaluation_report.txt
+
+============================================================
+ETAPA 5 CONCLUÍDA
+============================================================
+
+Melhor modelo: XGBOOST
+  R²:  0.8172
+  MSE: 4715.40
+  MAE: 42.37
+
+Arquivos gerados:
+  - best_model.joblib
+  - evaluation_report.txt
+
+📊 Histórico registrado para: s05_evaluation
+   Melhor modelo: xgboost (MSE: 4715.3960)
+📄 Relatório salvo: history/reports/report_20260423_135225.txt
+
+✅ Execução salva: history/runs/run_20260423_135225.json

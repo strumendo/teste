@@ -102,6 +102,26 @@ def prepare_features_target(df: pd.DataFrame, target_col: str = "Manutencao") ->
     if removed_features:
         print(f"  ⚠ Removidas {len(removed_features)} features com data leakage: {removed_features}")
 
+    # Remover features de medição que são CONSTANTES POR EQUIPAMENTO.
+    # Essas medições (cilindro/fuso/desgaste) vêm do xlsx de manutenção e
+    # assumem um único valor por equipamento — mesma informação já está
+    # codificada nas colunas OHE Equipamento_IJ_*, então mantê-las adiciona
+    # apenas colinearidade sem sinal novo.
+    equipment_constant_features = [
+        "cilindro_max", "cilindro_min", "cilindro_variacao", "desgaste_cilindro",
+        "fuso_max", "fuso_min", "fuso_variacao", "desgaste_fuso",
+        "taxa_desgaste_cilindro", "taxa_desgaste_fuso",
+        "indice_desgaste",  # derivado de desgaste_cilindro/fuso → também constante
+    ]
+    redundant_removed = []
+    for feat in equipment_constant_features:
+        if feat in feature_cols:
+            feature_cols.remove(feat)
+            redundant_removed.append(feat)
+
+    if redundant_removed:
+        print(f"  ⚠ Removidas {len(redundant_removed)} features redundantes com OHE Equipamento: {redundant_removed}")
+
     X = df[feature_cols].values
     y = df[target_col].values
 

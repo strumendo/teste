@@ -11,10 +11,10 @@ COMPARATIVO DE DESEMPENHO
 
 Rank   Modelo               R²         MSE          MAE          RMSE        
 ----------------------------------------------------------------------
-1      xgboost              0.6737     8281.18      67.00        91.00        ★
-2      random_forest        0.4807     13178.66     91.62        114.80        
-3      decision_tree        0.3925     15415.72     100.17       124.16        
-4      linear               0.1054     22703.10     123.21       150.68        
+1      xgboost              0.8172     4715.40      42.37        68.67        ★
+2      random_forest        0.7154     7342.12      59.56        85.69         
+3      decision_tree        0.6371     9360.54      70.35        96.75         
+4      linear               0.2921     18259.95     113.25       135.13        
 
 
 ======================================================================
@@ -22,13 +22,13 @@ MELHOR MODELO SELECIONADO: XGBOOST
 ======================================================================
 
 Métricas Finais:
-  R² (Coeficiente de Determinação): 0.6737
-  MSE (Erro Quadrático Médio):      8281.18
-  MAE (Erro Absoluto Médio):        67.00
-  RMSE (Raiz do MSE):               91.00
+  R² (Coeficiente de Determinação): 0.8172
+  MSE (Erro Quadrático Médio):      4715.40
+  MAE (Erro Absoluto Médio):        42.37
+  RMSE (Raiz do MSE):               68.67
 
 
 Interpretação:
-  ⚠ Ajuste moderado/baixo (R² < 0.70)
+  ○ Bom ajuste (R² entre 0.70 e 0.90)
 
 ======================================================================
