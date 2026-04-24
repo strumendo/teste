@@ -426,3 +426,93 @@ Modelo para novas seções:
 
 Lembrar de atualizar também a "Progressão do R²" acima.
 -->
+
+---
+
+## Alteração 6 — Relatório: consumo de massa por equipamento × composto
+
+### Motivação
+
+O relatório PDF detalhava produção, refugo e manutenções mensais por
+equipamento (seção 16), mas **não trazia visibilidade sobre o insumo
+principal do processo**: a massa (composto de borracha) consumida por cada
+equipamento, discriminada por tipo de composto. A demanda explícita foi:
+
+1. Gráfico(s) mostrando, por equipamento, a quantidade de cada tipo de
+   composto utilizado.
+2. No mesmo relatório, quanto cada equipamento por composto produziu em
+   **quilogramas** (não só em peças).
+
+Os dados necessários já existiam em `outputs/data_raw.csv` — cada linha tem
+`Equipamento`, `Descrição da massa (Composto)`, `Qtd. Produzida` e
+`Consumo de massa no item em (Kg/100pçs)` — faltava apenas derivar Kg e
+agregar por (equipamento, composto).
+
+### Arquivo modificado
+
+`sabo/sabo/Fase02/scripts/s06_generate_report.py`
+
+### Código adicionado
+
+Quatro funções novas, posicionadas entre `generate_monthly_equipment_charts`
+e `main()`:
+
+- **`_load_equipment_compound_aggregate(inicio, fim)`** — lê `data_raw.csv`,
+  detecta colunas dinamicamente (tolerando acentos/variantes — ex.
+  `Equipamento` ou `Cód. Recurso`), aplica o filtro de período vindo do
+  `pipeline_context`, calcula a coluna derivada
+  `_kg = Qtd_Produzida × Consumo_Kg_100pçs / 100` e agrega por
+  `(equipamento, composto)` com soma de peças e soma de Kg.
+- **`generate_equipment_compound_charts(inicio, fim)`** — gera gráficos de
+  barras horizontais, um painel por equipamento (composto no eixo Y, Kg no
+  eixo X, rótulo `"12.345 kg (3.210 pç)"`). Paginado em 8 painéis por PNG,
+  mesmo padrão da função mensal. Saída em `outputs/eda_plots/compound/`.
+- **`generate_equipment_compound_heatmap(inicio, fim)`** — único heatmap
+  equipamento (linhas) × composto (colunas), células = Kg. Compostos
+  ordenados decrescentemente por consumo total. Célula vazia (zero) fica em
+  branco; células com valor ≥ 1 000 kg exibem `"12,3k"`.
+- **`build_equipment_compound_summary(inicio, fim)`** — monta a lista de
+  linhas (cabeçalho + dados) para alimentar um `reportlab.platypus.Table`,
+  com formatação pt-BR dos números (peças sem casa decimal, Kg com 1).
+
+**Pontos de chamada em `main()`**: bloco `[2b/4]` adicionado após
+`generate_monthly_equipment_charts`, gravando em
+`results["compound_charts"]`, `results["compound_heatmap"]` e
+`results["compound_summary_rows"]`.
+
+**Renderização no PDF** (`generate_pdf_report`): nova seção `17. Consumo
+de Massa por Equipamento e Composto`, inserida antes de `Referência
+Bibliográfica`, com três subseções:
+
+- `17.1 Visão Geral — Heatmap Equipamento × Composto`
+- `17.2 Consumo Detalhado por Equipamento` (gráficos paginados)
+- `17.3 Tabela Detalhada — Peças e Kg por Equipamento/Composto`
+  (tabela paginada em blocos de 40 linhas com `repeatRows=1`)
+
+O sumário da capa também foi atualizado para listar a seção 17.
+
+### Resultado
+
+- **Não altera R²** — é um acréscimo puramente de relatório, sem mudança em
+  `s02_preprocessing.py`, `s04_modeling.py` ou `s05_evaluation.py`. A
+  progressão de R² acima permanece `0,8172` após Alteração 4.
+- Relatório passa a conter o cruzamento equipamento × composto em três
+  formatos complementares (heatmap para visão geral, barras para leitura
+  por equipamento, tabela para consulta exata).
+- Fórmula de kg aplicada coerente com a definição original do campo
+  `Consumo de massa no item em (Kg/100pçs)`: `Kg = Qtd × Consumo / 100`.
+
+### Ressalva
+
+- A leitura usa `data_raw.csv` diretamente. Se o arquivo não existir ou não
+  tiver as colunas esperadas, as três saídas retornam vazio e a seção 17
+  exibe uma mensagem informando a ausência de dados (não quebra o PDF).
+- Filtro de período (`inicio`/`fim`) é aplicado em `data_raw.csv`. Se
+  `data_raw.csv` for gerado com escopo diferente do usado por
+  `s02_preprocessing.py` + `s04_modeling.py`, a seção 17 pode refletir um
+  universo de registros distinto do universo de treino/teste — manter o
+  `inicio/fim` consistente ao invocar `run_pipeline.py --step 6` mitiga isso.
+- Como não há pandas/matplotlib no ambiente em que a alteração foi escrita,
+  a execução da etapa 6 foi validada apenas por `ast.parse`. A validação
+  visual do PDF precisa ser feita pelo usuário com
+  `python run_pipeline.py --step 6`.
