@@ -717,6 +717,7 @@ def generate_pdf_report(results: dict, output_path: str, inicio: str = None, fim
         "14. Recomendações",
         "15. Considerações Finais",
         "16. Análise Mensal por Equipamento",
+        "17. Consumo de Massa por Equipamento e Composto",
         "Referência Bibliográfica"
     ]
     for item in sumario_items:
@@ -1777,6 +1778,120 @@ def generate_pdf_report(results: dict, output_path: str, inicio: str = None, fim
 
     story.append(PageBreak())
 
+    # === 17. CONSUMO DE MASSA POR EQUIPAMENTO E COMPOSTO ===
+    story.append(Paragraph("17. Consumo de Massa por Equipamento e Composto", heading1_style))
+    story.append(Paragraph(
+        "Esta seção detalha, para cada equipamento, a quantidade de cada tipo de composto "
+        "(massa de borracha) utilizado no período analisado, bem como o volume em "
+        "quilogramas consumidos. A massa consumida é calculada como "
+        "<b>Kg = Qtd. Produzida × Consumo (Kg/100pçs) / 100</b>. O objetivo é apoiar "
+        "decisões de planejamento de insumos, identificar equipamentos com maior consumo "
+        "de compostos específicos e correlacionar tipo de composto com padrões de desgaste.",
+        body_style
+    ))
+    story.append(Spacer(1, 0.4*cm))
+
+    # 17.1 Heatmap geral
+    compound_heatmap = results.get("compound_heatmap")
+    if compound_heatmap and Path(compound_heatmap).exists():
+        story.append(Paragraph("17.1 Visão Geral — Heatmap Equipamento × Composto", heading2_style))
+        story.append(Paragraph(
+            "O heatmap abaixo apresenta de forma consolidada o consumo (em kg) de cada "
+            "composto por equipamento. Células mais escuras indicam maior consumo. "
+            "Compostos estão ordenados da esquerda para a direita em ordem decrescente "
+            "de consumo total.",
+            body_style
+        ))
+        try:
+            img = Image(str(compound_heatmap), width=17*cm, height=11*cm)
+            story.append(img)
+            story.append(Paragraph(
+                "<i>Figura: Heatmap de consumo de massa (kg) por equipamento e composto.</i>",
+                ParagraphStyle('Caption', parent=styles['Normal'], fontSize=10, alignment=TA_CENTER)
+            ))
+        except Exception as e:
+            print(f"  ⚠ Erro ao incluir heatmap de composto: {e}")
+        story.append(PageBreak())
+
+    # 17.2 Gráficos individuais por equipamento
+    compound_charts = results.get("compound_charts", [])
+    if compound_charts:
+        story.append(Paragraph("17.2 Consumo Detalhado por Equipamento", heading2_style))
+        story.append(Paragraph(
+            "Os gráficos a seguir mostram, para cada equipamento, o consumo total de cada "
+            "composto em kg, com a quantidade de peças produzidas indicada ao lado de cada "
+            "barra. Os equipamentos são apresentados em ordem alfabética, 8 por página.",
+            body_style
+        ))
+        story.append(Spacer(1, 0.3*cm))
+
+        import math
+        for idx, chart_info in enumerate(compound_charts):
+            if isinstance(chart_info, (list, tuple)):
+                chart_path, n_charts_on_page = chart_info
+            else:
+                chart_path, n_charts_on_page = chart_info, 8
+
+            if Path(chart_path).exists():
+                try:
+                    n_rows = math.ceil(n_charts_on_page / 2)
+                    img_height = 23 * n_rows / 4
+                    img = Image(str(chart_path), width=17*cm, height=img_height*cm)
+                    story.append(img)
+                    story.append(Spacer(1, 0.3*cm))
+                    story.append(Paragraph(
+                        f"<i>Figura: Consumo por Composto — Página {idx + 1}</i>",
+                        ParagraphStyle('Caption', parent=styles['Normal'], fontSize=10, alignment=TA_CENTER)
+                    ))
+                    if idx < len(compound_charts) - 1:
+                        story.append(PageBreak())
+                except Exception as e:
+                    print(f"  ⚠ Erro ao incluir gráfico de composto {chart_path}: {e}")
+        story.append(PageBreak())
+
+    # 17.3 Tabela resumo
+    compound_rows = results.get("compound_summary_rows")
+    if compound_rows and len(compound_rows) > 1:
+        story.append(Paragraph("17.3 Tabela Detalhada — Peças e Kg por Equipamento/Composto", heading2_style))
+        story.append(Paragraph(
+            "Tabela consolidada com todos os pares equipamento × composto observados no "
+            "período. A coluna <b>Peças produzidas</b> corresponde à soma de Qtd. Produzida; "
+            "<b>Massa consumida (kg)</b> corresponde à soma de Qtd. Produzida × Consumo/100.",
+            body_style
+        ))
+        story.append(Spacer(1, 0.2*cm))
+
+        # Paginar tabela em blocos para evitar tabelas gigantes únicas
+        header = compound_rows[0]
+        body_rows = compound_rows[1:]
+        chunk_size = 40
+        for chunk_idx in range(0, len(body_rows), chunk_size):
+            chunk = [header] + body_rows[chunk_idx:chunk_idx + chunk_size]
+            table = Table(chunk, colWidths=[2.8*cm, 6.5*cm, 3.5*cm, 4.0*cm], repeatRows=1)
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#F77F00')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 9),
+                ('FONTSIZE', (0, 1), (-1, -1), 8),
+                ('ALIGN', (2, 1), (-1, -1), 'RIGHT'),
+                ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('GRID', (0, 0), (-1, -1), 0.3, colors.grey),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F8F8F8')]),
+            ]))
+            story.append(table)
+            story.append(Spacer(1, 0.3*cm))
+    else:
+        story.append(Paragraph(
+            "Dados de consumo por composto não disponíveis — verifique se data_raw.csv "
+            "contém as colunas 'Descrição da massa (Composto)' e "
+            "'Consumo de massa no item em (Kg/100pçs)'.",
+            body_style
+        ))
+
+    story.append(PageBreak())
+
     # === REFERÊNCIAS ===
     story.append(Paragraph("Referência Bibliográfica", heading1_style))
     referencias = [
@@ -2165,6 +2280,248 @@ def generate_monthly_equipment_charts(inicio=None, fim=None, n_months=6) -> list
     return chart_paths
 
 
+# =============================================================================
+# CONSUMO DE MASSA POR EQUIPAMENTO × COMPOSTO
+# =============================================================================
+
+def _load_equipment_compound_aggregate(inicio=None, fim=None):
+    """
+    Lê data_raw.csv e retorna um DataFrame agregado por (equipamento, composto)
+    com colunas: equipamento, composto, pecas_produzidas, kg_consumidos.
+
+    Kg consumidos = Qtd. Produzida × Consumo_de_massa_por_100_peças / 100.
+    Retorna None caso os dados ou colunas necessárias não existam.
+    """
+    data_path = Path("data_raw.csv")
+    if not data_path.exists():
+        return None
+
+    try:
+        df = pd.read_csv(data_path)
+    except Exception as e:
+        print(f"  ⚠ Erro ao carregar data_raw.csv: {e}")
+        return None
+
+    # Detectar colunas dinamicamente (suporte a nomes com acentos)
+    date_col = next((c for c in df.columns if 'data' in c.lower() and 'produ' in c.lower()), None)
+    prod_col = next((c for c in df.columns if 'produzid' in c.lower() and 'acumul' not in c.lower()), None)
+    equip_col = next((c for c in df.columns if c.lower() == 'equipamento'), None)
+    if equip_col is None:
+        equip_col = next((c for c in df.columns if 'recurso' in c.lower()), None)
+    comp_col = next((c for c in df.columns if 'massa' in c.lower() and 'composto' in c.lower()
+                     and 'consumo' not in c.lower()), None)
+    cons_col = next((c for c in df.columns if 'consumo' in c.lower() and 'massa' in c.lower()
+                     and 'acumul' not in c.lower()), None)
+
+    if not all([prod_col, equip_col, comp_col, cons_col]):
+        print(f"  ⚠ Colunas necessárias não encontradas em data_raw.csv "
+              f"(produção={prod_col}, equip={equip_col}, composto={comp_col}, consumo={cons_col})")
+        return None
+
+    # Filtrar período
+    if date_col:
+        df[date_col] = pd.to_datetime(df[date_col], errors='coerce')
+        df = df.dropna(subset=[date_col])
+        if inicio:
+            df = df[df[date_col] >= pd.Timestamp(inicio)]
+        if fim:
+            df = df[df[date_col] <= pd.Timestamp(fim)]
+
+    # Tipar numéricos e remover linhas incompletas
+    df[prod_col] = pd.to_numeric(df[prod_col], errors='coerce')
+    df[cons_col] = pd.to_numeric(df[cons_col], errors='coerce')
+    df = df.dropna(subset=[equip_col, comp_col, prod_col, cons_col])
+
+    if len(df) == 0:
+        return None
+
+    # Kg = peças × kg/100pçs / 100
+    df['_kg'] = df[prod_col] * df[cons_col] / 100.0
+
+    grp = df.groupby([equip_col, comp_col], as_index=False).agg(
+        pecas_produzidas=(prod_col, 'sum'),
+        kg_consumidos=('_kg', 'sum'),
+    )
+    grp = grp.rename(columns={equip_col: 'equipamento', comp_col: 'composto'})
+    grp = grp.sort_values(['equipamento', 'kg_consumidos'], ascending=[True, False])
+    return grp
+
+
+def generate_equipment_compound_charts(inicio=None, fim=None) -> list:
+    """
+    Gera gráficos de barras horizontais mostrando, para cada equipamento,
+    o consumo de massa (Kg) por tipo de composto. Paginado em 8 equipamentos
+    por página para facilitar a leitura no relatório.
+
+    Returns:
+        Lista de tuplas (caminho_png, n_charts_na_pagina).
+    """
+    if not HAS_MATPLOTLIB:
+        print("  ⚠ Matplotlib não disponível. Gráficos por composto não serão gerados.")
+        return []
+
+    agg = _load_equipment_compound_aggregate(inicio=inicio, fim=fim)
+    if agg is None or len(agg) == 0:
+        print("  ⚠ Sem dados suficientes para gráficos equipamento × composto.")
+        return []
+
+    output_dir = Path("eda_plots") / "compound"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    equipments = sorted(agg['equipamento'].unique())
+    print(f"  Gerando gráficos para {len(equipments)} equipamentos...")
+
+    chart_paths = []
+    charts_per_page = 8
+
+    for page_idx in range(0, len(equipments), charts_per_page):
+        page_equips = equipments[page_idx:page_idx + charts_per_page]
+        n_charts = len(page_equips)
+
+        fig, axes = plt.subplots(4, 2, figsize=(16, 22))
+        axes_flat = axes.flatten()
+
+        for i, equip in enumerate(page_equips):
+            ax = axes_flat[i]
+            eq_df = agg[agg['equipamento'] == equip].sort_values('kg_consumidos', ascending=True)
+
+            compostos = eq_df['composto'].astype(str).tolist()
+            kgs = eq_df['kg_consumidos'].values
+            pecas = eq_df['pecas_produzidas'].values
+
+            y = np.arange(len(compostos))
+            bars = ax.barh(y, kgs, color='#1f77b4', alpha=0.85, zorder=3)
+
+            # Rótulos: Kg (peças)
+            xmax = kgs.max() if len(kgs) and kgs.max() > 0 else 1
+            for bar, kg, pc in zip(bars, kgs, pecas):
+                ax.text(
+                    bar.get_width() + xmax * 0.01,
+                    bar.get_y() + bar.get_height() / 2,
+                    f"{kg:,.0f} kg ({int(pc):,} pç)",
+                    va='center', fontsize=7, color='#333333'
+                )
+
+            ax.set_yticks(y)
+            ax.set_yticklabels(compostos, fontsize=8)
+            ax.set_title(f"{equip} — Consumo por Composto", fontsize=11, fontweight='bold')
+            ax.set_xlabel('Massa consumida (kg)', fontsize=9)
+            ax.set_xlim(0, xmax * 1.25 if xmax > 0 else 1)
+            ax.grid(axis='x', alpha=0.3, zorder=0)
+            ax.set_axisbelow(True)
+            ax.xaxis.set_major_formatter(mticker.FuncFormatter(lambda val, p: f'{int(val):,}'))
+
+        # Ocultar subplots não usados
+        for i in range(n_charts, 8):
+            axes_flat[i].set_visible(False)
+
+        fig.suptitle(
+            'Consumo de Massa por Equipamento e Composto\n'
+            '(kg consumidos + peças produzidas)',
+            fontsize=13, fontweight='bold', y=1.0
+        )
+        fig.tight_layout(rect=[0, 0, 1, 0.95])
+
+        page_num = page_idx // charts_per_page + 1
+        chart_path = output_dir / f"compound_equip_page_{page_num:02d}.png"
+        fig.savefig(chart_path, dpi=150, bbox_inches='tight', facecolor='white')
+        plt.close(fig)
+
+        chart_paths.append((chart_path, n_charts))
+        print(f"    Página {page_num}: {', '.join(page_equips)}")
+
+    print(f"  ✓ {len(chart_paths)} páginas de gráficos equipamento × composto geradas")
+    return chart_paths
+
+
+def generate_equipment_compound_heatmap(inicio=None, fim=None) -> str:
+    """
+    Gera um heatmap único equipamento × composto mostrando Kg consumidos.
+
+    Returns:
+        Caminho do PNG gerado, ou None se indisponível.
+    """
+    if not HAS_MATPLOTLIB:
+        return None
+
+    agg = _load_equipment_compound_aggregate(inicio=inicio, fim=fim)
+    if agg is None or len(agg) == 0:
+        return None
+
+    output_dir = Path("eda_plots") / "compound"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    pivot = agg.pivot_table(
+        index='equipamento', columns='composto',
+        values='kg_consumidos', aggfunc='sum', fill_value=0.0
+    )
+    # Ordenar compostos pela soma total (mais usado à esquerda)
+    col_order = pivot.sum(axis=0).sort_values(ascending=False).index
+    pivot = pivot[col_order]
+
+    n_equip, n_comp = pivot.shape
+    fig_w = max(12, min(0.55 * n_comp + 4, 26))
+    fig_h = max(6, min(0.35 * n_equip + 3, 22))
+
+    fig, ax = plt.subplots(figsize=(fig_w, fig_h))
+    data = pivot.values
+    vmax = data.max() if data.size and data.max() > 0 else 1
+    im = ax.imshow(data, aspect='auto', cmap='YlOrRd', vmin=0, vmax=vmax)
+
+    ax.set_xticks(np.arange(n_comp))
+    ax.set_xticklabels(pivot.columns, rotation=45, ha='right', fontsize=8)
+    ax.set_yticks(np.arange(n_equip))
+    ax.set_yticklabels(pivot.index, fontsize=8)
+    ax.set_xlabel('Composto', fontsize=10)
+    ax.set_ylabel('Equipamento', fontsize=10)
+    ax.set_title('Heatmap — Consumo de Massa (kg) por Equipamento × Composto',
+                 fontsize=12, fontweight='bold')
+
+    # Anotar células com valor > 0 (em milhares de kg se grande)
+    for i in range(n_equip):
+        for j in range(n_comp):
+            val = data[i, j]
+            if val > 0:
+                text = f"{val/1000:.1f}k" if val >= 1000 else f"{val:.0f}"
+                color = 'white' if val > vmax * 0.55 else 'black'
+                ax.text(j, i, text, ha='center', va='center', fontsize=6, color=color)
+
+    cbar = fig.colorbar(im, ax=ax, shrink=0.8)
+    cbar.set_label('Massa consumida (kg)', fontsize=9)
+
+    fig.tight_layout()
+    out_path = output_dir / "compound_equipamento_heatmap.png"
+    fig.savefig(out_path, dpi=150, bbox_inches='tight', facecolor='white')
+    plt.close(fig)
+    print(f"  ✓ Heatmap equipamento × composto: {out_path}")
+    return str(out_path)
+
+
+def build_equipment_compound_summary(inicio=None, fim=None) -> list:
+    """
+    Constrói a tabela resumo (equipamento, composto, peças, Kg) usada na
+    seção 17 do relatório.
+
+    Returns:
+        Lista de linhas como listas de strings, pronta para ser alimentada
+        em um reportlab.platypus.Table. Cabeçalho é a primeira linha.
+        Retorna None quando não há dados.
+    """
+    agg = _load_equipment_compound_aggregate(inicio=inicio, fim=fim)
+    if agg is None or len(agg) == 0:
+        return None
+
+    rows = [["Equipamento", "Composto", "Peças produzidas", "Massa consumida (kg)"]]
+    for _, r in agg.iterrows():
+        rows.append([
+            str(r['equipamento']),
+            str(r['composto']),
+            f"{int(r['pecas_produzidas']):,}".replace(",", "."),
+            f"{r['kg_consumidos']:,.1f}".replace(",", "X").replace(".", ",").replace("X", "."),
+        ])
+    return rows
+
+
 def main(inicio=None, fim=None, suffix="", version=None, **kwargs) -> dict:
     """
     Função principal - Etapa 6: Geração de Relatório.
@@ -2199,6 +2556,12 @@ def main(inicio=None, fim=None, suffix="", version=None, **kwargs) -> dict:
     print("\n[2/4] Gerando gráficos mensais por equipamento...")
     monthly_charts = generate_monthly_equipment_charts(inicio=inicio, fim=fim)
     results["monthly_charts"] = monthly_charts
+
+    # Gerar gráficos e tabela de consumo por equipamento × composto
+    print("\n[2b/4] Gerando análise de consumo por equipamento × composto...")
+    results["compound_charts"] = generate_equipment_compound_charts(inicio=inicio, fim=fim)
+    results["compound_heatmap"] = generate_equipment_compound_heatmap(inicio=inicio, fim=fim)
+    results["compound_summary_rows"] = build_equipment_compound_summary(inicio=inicio, fim=fim)
 
     # Determinar versão
     if not version:
