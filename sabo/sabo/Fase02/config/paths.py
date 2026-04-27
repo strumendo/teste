@@ -98,6 +98,22 @@ def get_maintenance_history_file() -> Path:
     return None
 
 
+def get_preventive_history_file() -> Path:
+    """
+    Retorna o caminho do XLSX de histórico de preventivas (padrão
+    "Histórico Geral Preventivas*.xlsx") na pasta data/manutencao/.
+
+    Esse arquivo traz a série temporal completa de preventivas RM.195 por
+    equipamento (4–9 datas por equipamento), bem mais rica que as 2 datas
+    isoladas do "Dados Manut*.xlsx".
+    """
+    if DATA_MANUTENCAO_DIR.exists():
+        files = list(DATA_MANUTENCAO_DIR.glob("Histórico Geral Preventivas*.xlsx"))
+        if files:
+            return max(files, key=lambda f: f.stat().st_mtime)
+    return None
+
+
 def get_all_maintenance_xlsx_files() -> list:
     """
     Retorna TODOS os arquivos XLSX de manutenção (padrão "Dados Manut*.xlsx"),
