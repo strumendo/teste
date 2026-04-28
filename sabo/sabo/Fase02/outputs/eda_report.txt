@@ -4,9 +4,9 @@ RELATÓRIO DE ANÁLISE EXPLORATÓRIA (EDA)
 
 INSIGHTS PRINCIPAIS
 ----------------------------------------
-1. Dataset contém 13874 registros e 92 features.
+1. Dataset contém 13874 registros e 98 features.
 2. Variável target 'Manutencao': média de 252.3 dias, variando de 0 a 975 dias.
-3. Atenção: 10 colunas com >5% de outliers: Qtd_Produzida, Qtd_Refugada, Fator_Un, Consumo_de_massa_no_item_em_Kg_100pçs, Qtd_Produzida_Acumulado
+3. Atenção: 12 colunas com >5% de outliers: Qtd_Produzida, Qtd_Refugada, Fator_Un, Consumo_de_massa_no_item_em_Kg_100pçs, Qtd_Produzida_Acumulado
 
 ======================================================================
 ESTATÍSTICAS DESCRITIVAS
@@ -281,3 +281,57 @@ dias_desde_penultima_manutencao:
   Mediana:  393.0000
   Q3 (75%): 553.0000
   Máximo:   832.0000
+
+n_preventivas_passadas:
+  Média:    3.5853
+  Desvio:   1.5760
+  Mínimo:   1.0000
+  Q1 (25%): 2.0000
+  Mediana:  3.0000
+  Q3 (75%): 5.0000
+  Máximo:   7.0000
+
+dias_desde_ultima_preventiva:
+  Média:    221.7608
+  Desvio:   128.1186
+  Mínimo:   1.0000
+  Q1 (25%): 122.0000
+  Mediana:  206.0000
+  Q3 (75%): 311.0000
+  Máximo:   580.0000
+
+intervalo_medio_passado:
+  Média:    510.4367
+  Desvio:   89.8504
+  Mínimo:   149.0000
+  Q1 (25%): 457.6000
+  Mediana:  502.2500
+  Q3 (75%): 564.0000
+  Máximo:   776.0000
+
+intervalo_ultimo_passado:
+  Média:    465.6013
+  Desvio:   105.1384
+  Mínimo:   149.0000
+  Q1 (25%): 379.0000
+  Mediana:  461.0000
+  Q3 (75%): 524.0000
+  Máximo:   776.0000
+
+desvio_padrao_intervalo_passado:
+  Média:    134.1607
+  Desvio:   53.2419
+  Mínimo:   16.5000
+  Q1 (25%): 116.1303
+  Mediana:  140.8812
+  Q3 (75%): 146.5219
+  Máximo:   252.6386
+
+tendencia_intervalo_passado:
+  Média:    -54.3912
+  Desvio:   110.9025
+  Mínimo:   -420.0000
+  Q1 (25%): -84.0000
+  Mediana:  0.0000
+  Q3 (75%): 0.0000
+  Máximo:   476.0000

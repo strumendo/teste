@@ -42,7 +42,7 @@ try:
     from paths import (
         DATA_DIR, DATA_MANUTENCAO_DIR,
         get_maintenance_file, get_maintenance_history_file,
-        get_all_maintenance_xlsx_files,
+        get_all_maintenance_xlsx_files, get_preventive_history_file,
     )
 except ImportError:
     DATA_DIR = BASE_DIR / "data"
@@ -70,9 +70,17 @@ except ImportError:
         unique = {f.resolve(): f for f in files}
         return sorted(unique.values(), key=lambda f: f.stat().st_mtime)
 
+    def get_preventive_history_file():
+        if DATA_MANUTENCAO_DIR.exists():
+            files = list(DATA_MANUTENCAO_DIR.glob("Histórico Geral Preventivas*.xlsx"))
+            if files:
+                return max(files, key=lambda f: f.stat().st_mtime)
+        return None
+
 # Cache global para dados de manutenção (evita recarregar arquivo múltiplas vezes)
 _MAINTENANCE_CACHE = None
 _EQUIPMENT_STATS_CACHE = None
+_PREVENTIVE_HISTORY_CACHE = None  # dict: {equip_id: sorted np.ndarray[datetime64[D]]}
 
 
 def load_maintenance_data() -> tuple:
@@ -1006,6 +1014,182 @@ def add_maintenance_history_features(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def load_preventive_history() -> dict:
+    """
+    Carrega o histórico de preventivas RM.195 a partir do XLSX
+    "Histórico Geral Preventivas*.xlsx" em data/manutencao/.
+
+    Retorna um dict {equip_id: np.ndarray[datetime64[D]] ordenado ascendentemente}.
+    Cada array contém TODAS as datas de preventiva conhecidas para o equipamento
+    (passadas e futuras). Filtragem por look-ahead (uso somente do passado em
+    relação à Data_de_Produção) é responsabilidade do consumidor.
+
+    Faz cache global para evitar releitura do xlsx em chamadas repetidas.
+    """
+    global _PREVENTIVE_HISTORY_CACHE
+    if _PREVENTIVE_HISTORY_CACHE is not None:
+        return _PREVENTIVE_HISTORY_CACHE
+
+    fp = get_preventive_history_file()
+    if fp is None or not fp.exists():
+        print("  ⚠ Arquivo 'Histórico Geral Preventivas*.xlsx' não encontrado")
+        _PREVENTIVE_HISTORY_CACHE = {}
+        return _PREVENTIVE_HISTORY_CACHE
+
+    try:
+        df_hist = pd.read_excel(fp)
+    except Exception as e:
+        print(f"  ⚠ Erro ao ler histórico de preventivas: {e}")
+        _PREVENTIVE_HISTORY_CACHE = {}
+        return _PREVENTIVE_HISTORY_CACHE
+
+    equip_col = next((c for c in df_hist.columns if c.strip().lower() == "equipamento"), None)
+    date_col = next((c for c in df_hist.columns if "iníc" in c.lower() or "inic" in c.lower()), None)
+    if equip_col is None or date_col is None:
+        print(f"  ⚠ Colunas esperadas não encontradas no histórico: {list(df_hist.columns)}")
+        _PREVENTIVE_HISTORY_CACHE = {}
+        return _PREVENTIVE_HISTORY_CACHE
+
+    df_hist = df_hist[[equip_col, date_col]].copy()
+    df_hist[date_col] = pd.to_datetime(df_hist[date_col], errors="coerce")
+    df_hist = df_hist.dropna(subset=[date_col])
+
+    by_equip: dict = {}
+    for equip, grp in df_hist.groupby(equip_col):
+        dates = grp[date_col].sort_values().values.astype("datetime64[D]")
+        by_equip[str(equip).strip()] = dates
+
+    print(f"  ✓ Histórico de preventivas carregado: {len(by_equip)} equipamentos, "
+          f"{sum(len(v) for v in by_equip.values())} datas totais")
+    _PREVENTIVE_HISTORY_CACHE = by_equip
+    return _PREVENTIVE_HISTORY_CACHE
+
+
+def _preventive_features_for_row(equip_id, prod_date_d, history: dict) -> dict:
+    """
+    Calcula features de preventivas para uma linha, usando APENAS preventivas
+    com data estritamente anterior a prod_date_d (sem look-ahead).
+
+    Retorna dict com:
+    - n_preventivas_passadas
+    - dias_desde_ultima_preventiva  (NaN → preenchido depois)
+    - intervalo_medio_passado
+    - intervalo_ultimo_passado
+    - desvio_padrao_intervalo_passado
+    - tendencia_intervalo_passado  (slope linear das últimas até 3 lacunas; 0 se <2)
+    """
+    out = {
+        "n_preventivas_passadas": 0,
+        "dias_desde_ultima_preventiva": np.nan,
+        "intervalo_medio_passado": np.nan,
+        "intervalo_ultimo_passado": np.nan,
+        "desvio_padrao_intervalo_passado": np.nan,
+        "tendencia_intervalo_passado": 0.0,
+    }
+    dates = history.get(equip_id) if history else None
+    if dates is None or len(dates) == 0 or pd.isna(prod_date_d):
+        return out
+
+    prod_d = np.datetime64(pd.Timestamp(prod_date_d).to_datetime64(), "D")
+    past = dates[dates < prod_d]
+    n = len(past)
+    out["n_preventivas_passadas"] = int(n)
+    if n == 0:
+        return out
+
+    out["dias_desde_ultima_preventiva"] = float((prod_d - past[-1]).astype("timedelta64[D]").astype(int))
+
+    if n >= 2:
+        intervals = np.diff(past).astype("timedelta64[D]").astype(int)
+        out["intervalo_medio_passado"] = float(intervals.mean())
+        out["intervalo_ultimo_passado"] = float(intervals[-1])
+        if len(intervals) >= 2:
+            out["desvio_padrao_intervalo_passado"] = float(intervals.std(ddof=0))
+            tail = intervals[-3:] if len(intervals) >= 3 else intervals
+            x = np.arange(len(tail), dtype=float)
+            slope = np.polyfit(x, tail.astype(float), 1)[0] if len(tail) >= 2 else 0.0
+            out["tendencia_intervalo_passado"] = float(slope)
+    return out
+
+
+def add_preventive_history_features(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Adiciona features derivadas do "Histórico Geral Preventivas RM.195".
+
+    Diferente de add_maintenance_history_features (que usa só 2 datas por
+    equipamento), aqui temos a série completa de preventivas, o que permite
+    estimar empiricamente o ciclo de cada equipamento.
+
+    Features criadas (por linha):
+    - n_preventivas_passadas
+    - dias_desde_ultima_preventiva
+    - intervalo_medio_passado
+    - intervalo_ultimo_passado
+    - desvio_padrao_intervalo_passado
+    - tendencia_intervalo_passado
+
+    Look-ahead: somente preventivas com data < Data_de_Produção entram no cálculo.
+    """
+    history = load_preventive_history()
+    if not history:
+        print("  ⚠ Sem histórico de preventivas; features não criadas")
+        return df
+
+    equip_col = next((c for c in ["Equipamento", "Cod Recurso"] if c in df.columns), None)
+    date_col = next(
+        (c for c in ["Data de Produção", "Data de Produção Acumulada"] if c in df.columns),
+        None,
+    )
+    if equip_col is None or date_col is None:
+        print("  ⚠ Colunas Equipamento/Data não encontradas; features não criadas")
+        return df
+
+    prod_dates = pd.to_datetime(df[date_col], errors="coerce")
+
+    feats = {
+        "n_preventivas_passadas": np.zeros(len(df), dtype=float),
+        "dias_desde_ultima_preventiva": np.full(len(df), np.nan),
+        "intervalo_medio_passado": np.full(len(df), np.nan),
+        "intervalo_ultimo_passado": np.full(len(df), np.nan),
+        "desvio_padrao_intervalo_passado": np.full(len(df), np.nan),
+        "tendencia_intervalo_passado": np.zeros(len(df), dtype=float),
+    }
+
+    cache: dict = {}
+    equip_arr = df[equip_col].astype(str).str.strip().values
+    date_arr = prod_dates.values
+
+    for i in range(len(df)):
+        equip = equip_arr[i]
+        d = date_arr[i]
+        key = (equip, d)
+        if key in cache:
+            row_feats = cache[key]
+        else:
+            row_feats = _preventive_features_for_row(equip, d, history)
+            cache[key] = row_feats
+        for k, v in row_feats.items():
+            feats[k][i] = v
+
+    for k, arr in feats.items():
+        df[k] = arr
+
+    fill_medians = [
+        "dias_desde_ultima_preventiva",
+        "intervalo_medio_passado",
+        "intervalo_ultimo_passado",
+        "desvio_padrao_intervalo_passado",
+    ]
+    for col in fill_medians:
+        med = df[col].median()
+        df[col] = df[col].fillna(med if pd.notna(med) else 0.0)
+    df["n_preventivas_passadas"] = df["n_preventivas_passadas"].fillna(0).astype(int)
+    df["tendencia_intervalo_passado"] = df["tendencia_intervalo_passado"].fillna(0.0)
+
+    print(f"  ✓ Adicionadas 6 features do histórico de preventivas")
+    return df
+
+
 def add_date_features(df: pd.DataFrame) -> pd.DataFrame:
     """
     Deriva features numéricas da Data_de_Produção.
@@ -1261,8 +1445,9 @@ def main(inicio=None, fim=None, **kwargs) -> dict:
     Returns:
         Dicionário com resultados da execução
     """
-    global _MAINTENANCE_CACHE
+    global _MAINTENANCE_CACHE, _PREVENTIVE_HISTORY_CACHE
     _MAINTENANCE_CACHE = None  # Limpar cache para recarregar dados de manutenção
+    _PREVENTIVE_HISTORY_CACHE = None  # Recarregar histórico de preventivas
 
     print("=" * 60)
     print("ETAPA 2: PRÉ-PROCESSAMENTO E LIMPEZA")
@@ -1314,6 +1499,9 @@ def main(inicio=None, fim=None, **kwargs) -> dict:
 
     print("\n[6.1] Derivando features do histórico de manutenção...")
     df = add_maintenance_history_features(df)
+
+    print("\n[6.2] Derivando features do histórico de preventivas RM.195...")
+    df = add_preventive_history_features(df)
 
     print("\n[7/8] Aplicando One-Hot Encoding...")
     df = apply_one_hot_encoding(df)

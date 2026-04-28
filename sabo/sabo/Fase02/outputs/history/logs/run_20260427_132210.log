@@ -1,0 +1,810 @@
+# Pipeline SABO — execução 20260427_132210
+# Início: 2026-04-27T13:22:10.706234
+# Comando: run_pipeline.py
+
+Log desta execução: history/logs/run_20260427_132210.log
+======================================================================
+SABO - PIPELINE DE MACHINE LEARNING
+Manutenção Preditiva para Equipamentos Industriais
+(Conforme fluxos.drawio)
+======================================================================
+
+╔═══════════════════════════════════════════════════════════════════╗
+║                    PIPELINE SABO - fluxos.drawio                  ║
+╠═══════════════════════════════════════════════════════════════════╣
+║                                                                   ║
+║   ┌─────────────────┐                                             ║
+║   │ 1. COLETA E     │  CSV Files (ij-044, ij-046, ij-117...)      ║
+║   │    INTEGRAÇÃO   │  ───────────────────────────────────►       ║
+║   │    (azul)       │                    DataFrame Único          ║
+║   └────────┬────────┘                                             ║
+║            │                                                      ║
+║            ▼                                                      ║
+║   ┌─────────────────┐  Remover duplicadas                         ║
+║   │ 2. PRÉ-PROC.    │  Tratar nulos                               ║
+║   │    E LIMPEZA    │  Converter datas                            ║
+║   │    (amarelo)    │  Variáveis acumulativas                     ║
+║   │                 │  One-Hot Encoding                           ║
+║   └────────┬────────┘                                             ║
+║            │                                                      ║
+║            ▼                                                      ║
+║   ┌─────────────────┐  Estatísticas: Média, Desvio, Quartis       ║
+║   │ 3. ANÁLISE      │  Gráficos: Histogramas, Boxplots            ║
+║   │    EXPLORATÓRIA │  Correlação: Heatmaps, Dispersão            ║
+║   │    (vermelho)   │                                             ║
+║   └────────┬────────┘                                             ║
+║            │                                                      ║
+║            ▼                                                      ║
+║   ┌─────────────────┐  Divisão: 80% Treino / 20% Teste            ║
+║   │ 4. MODELAGEM    │  ┌──────────────────────────────┐           ║
+║   │    E TREINO     │  │ Regressão Linear │ Dec. Tree │           ║
+║   │    (roxo)       │  │ Random Forest    │ XGBoost   │           ║
+║   │                 │  └──────────────────────────────┘           ║
+║   └────────┬────────┘                                             ║
+║            │                                                      ║
+║            ▼                                                      ║
+║   ┌─────────────────┐  Testar nos 20%                             ║
+║   │ 5. VALIDAÇÃO    │  Métricas: R², MSE, MAE                     ║
+║   │    E AVALIAÇÃO  │  Comparar modelos                           ║
+║   │    (laranja)    │  Selecionar melhor                          ║
+║   └────────┬────────┘                                             ║
+║            │                                                      ║
+║            ▼                                                      ║
+║   ┌─────────────────┐  Relatório PDF completo                     ║
+║   │ 6. GERAÇÃO DE   │  Formato padrão SABO                        ║
+║   │    RELATÓRIO    │  Documentação do projeto                    ║
+║   │    (verde)      │  ───────► Relatorio_SABO_RX.pdf             ║
+║   └─────────────────┘                                             ║
+║                                                                   ║
+╚═══════════════════════════════════════════════════════════════════╝
+
+
+ID desta execução: 20260427_132210
+
+======================================================================
+ETAPA 0: SEPARAÇÃO DE ARQUIVO ÚNICO
+Descrição: Separa arquivo único por equipamento → data/raw/
+Entradas:  data/arquivo_unico/*.xlsx
+Saídas:    data/raw/<equipamento>.csv, data/raw/<equipamento>.xlsx
+======================================================================
+============================================================
+ETAPA 0: SEPARAÇÃO DE ARQUIVO ÚNICO POR EQUIPAMENTO
+============================================================
+
+[1/3] Garantindo baseline XLSX -> CSV em data/raw/...
+  Todos os .xlsx já possuem versão .csv
+
+[2/3] Procurando arquivos em data/arquivo_unico/...
+  Nenhum arquivo encontrado em data/arquivo_unico/
+
+============================================================
+ETAPA 0 CONCLUÍDA (sem arquivos novos)
+============================================================
+
+📊 Histórico registrado para: s00_split_unified
+
+======================================================================
+ETAPA 1: COLETA E INTEGRAÇÃO
+Descrição: CSV Files → DataFrame Único
+Entradas:  Arquivos CSV/XLSX de equipamentos
+Saídas:    data_raw.csv
+======================================================================
+============================================================
+ETAPA 1: COLETA E INTEGRAÇÃO DE DADOS
+(Conforme fluxos.drawio)
+============================================================
+
+Diretório de dados: /home/strumendo/PycharmProjects/teste/sabo/sabo/Fase02/data/raw
+
+Carregando arquivos CSV/XLSX padrão...
+  (Excluindo 1 arquivo(s) estendido(s): ['IJ-138.2'])
+  ✓ IJ-044: 1409 registros
+  ✓ IJ-046: 1979 registros
+  ✓ IJ-117: 1980 registros
+  ✓ IJ-118: 2016 registros
+  ✓ IJ-119: 2115 registros
+  ✓ IJ-120: 1843 registros
+  ✓ IJ-121: 1978 registros
+  ✓ IJ-122: 1120 registros
+  ✓ IJ-123: 2030 registros
+  ✓ IJ-124: 1789 registros
+  ✓ IJ-125: 1202 registros
+  ✓ IJ-129: 2078 registros
+  ✓ IJ-130: 116 registros
+  ✓ IJ-131: 2022 registros
+  ✓ IJ-132: 1087 registros
+  ✓ IJ-133: 1473 registros
+  ✓ IJ-134: 1877 registros
+  ✓ IJ-135: 1484 registros
+  ✓ IJ-136: 1267 registros
+  ✓ IJ-137: 1580 registros
+  ✓ IJ-138: 1559 registros
+  ✓ IJ-139: 1614 registros
+  ✓ IJ-151: 1952 registros
+  ✓ IJ-152: 1687 registros
+  ✓ IJ-156: 749 registros
+  ✓ IJ-164: 1748 registros
+
+Carregando arquivos com formato estendido (dados históricos)...
+  Carregando arquivo estendido: IJ-138.2.xlsx
+  ✓ IJ-138.2.xlsx: 961 registros (dados históricos)
+
+Carregando arquivos DadosProducao (dados consolidados)...
+
+Integrando em DataFrame único...
+  ⚠ Removidos 39 registros duplicados (42715 → 42676)
+
+  Período total dos dados: 19/03/2023 a 31/03/2026
+  Duração total: 1108 dias (36 meses)
+
+✓ DataFrame único salvo: /home/strumendo/PycharmProjects/teste/sabo/sabo/Fase02/outputs/data_raw.csv
+  Total: 42676 registros de 27 fontes de dados
+  (inclui 1 arquivo(s) com dados históricos)
+
+============================================================
+ETAPA 1 CONCLUÍDA
+============================================================
+
+📊 Histórico registrado para: s01_data_collection
+
+======================================================================
+ETAPA 2: PRÉ-PROCESSAMENTO E LIMPEZA
+Descrição: Higienização + Engenharia de Features
+Entradas:  data_raw.csv
+Saídas:    data_preprocessed.csv
+======================================================================
+============================================================
+ETAPA 2: PRÉ-PROCESSAMENTO E LIMPEZA
+(Conforme fluxos.drawio)
+============================================================
+
+[1/6] Carregando dados brutos...
+  Carregado: 42676 registros, 15 colunas
+
+----------------------------------------
+HIGIENIZAÇÃO E TRANSFORMAÇÃO
+----------------------------------------
+
+[2/6] Removendo duplicadas...
+  ✓ Nenhuma duplicata encontrada
+
+[3/6] Tratando valores nulos...
+  Tratando 131244 valores nulos...
+    Descrição da massa (Composto): preenchido com moda (P250/14)
+    Consumo de massa no item em (Kg/100pçs): preenchido com mediana (0.79)
+    Unnamed: 9: preenchido com moda (N146/9)
+    Unnamed: 10: preenchido com mediana (1.47)
+    Fonte_Dados: preenchido com moda (IJ-138.2.xlsx)
+  ✓ Valores nulos tratados
+
+[4/6] Convertendo datas...
+
+[4.1] Calculando dias até manutenção...
+  📋 Carregando dados de manutenção (2 arquivo(s)):
+      - Dados Manut - 27 Equip - 2025.xlsx
+      - Dados Manut - 27 Equip - 2026.xlsx
+    ✓ Carregados 28 equipamentos (todos os arquivos unidos)
+    ✓ Equipamentos com medições: 23
+/home/strumendo/PycharmProjects/teste/sabo/sabo/Fase02/scripts/s02_preprocessing.py:926: UserWarning: Parsing dates in %Y-%m-%d format when dayfirst=True was specified. Pass `dayfirst=False` or specify a format to silence this warning.
+  prod_date = pd.to_datetime(row[date_col], dayfirst=True, errors='coerce')
+  ✓ Removidos 1599 registros pós-manutenção
+  ✓ Calculada variável 'Manutencao' (dias até manutenção)
+
+----------------------------------------
+ENGENHARIA DE FEATURES
+----------------------------------------
+
+[4.2] Derivando features de data...
+  ✓ Adicionadas 4 features de data (ref mínima: 2023-03-19)
+
+[5/7] Gerando variáveis acumulativas...
+  ✓ Criada variável acumulativa: Qtd. Produzida_Acumulado
+  ✓ Criada variável acumulativa: Qtd. Refugada_Acumulado
+  ✓ Criada variável acumulativa: Qtd. Retrabalhada_Acumulado
+  ✓ Criada variável acumulativa: Consumo de massa no item em (Kg/100pçs)_Acumulado
+
+[6/7] Adicionando medições de desgaste...
+  Adicionando features de medições de desgaste...
+  ✓ Adicionadas 13 features de medição/desgaste
+
+[6.1] Derivando features do histórico de manutenção...
+  ✓ Adicionadas 2 features de histórico de manutenção
+
+[6.2] Derivando features do histórico de preventivas RM.195...
+  ✓ Histórico de preventivas carregado: 27 equipamentos, 165 datas totais
+  ✓ Adicionadas 6 features do histórico de preventivas
+
+[7/8] Aplicando One-Hot Encoding...
+  ✓ One-Hot Encoding aplicado: Equipamento (26 categorias)
+  ✓ One-Hot Encoding aplicado: Descrição da massa (Composto) (34 categorias)
+  ✓ One-Hot Encoding aplicado: Cód. Un. (1 categorias)
+
+[7.1] Agregando ao grão dia-equipamento...
+  ✓ Agregação dia-equipamento: 41077 → 13874 linhas (66.2% redução)
+
+[8/8] Calculando estatísticas por equipamento...
+  Carregado: 42676 registros, 15 colunas
+  ✓ Nenhuma duplicata encontrada
+  Tratando 131244 valores nulos...
+    Descrição da massa (Composto): preenchido com moda (P250/14)
+    Consumo de massa no item em (Kg/100pçs): preenchido com mediana (0.79)
+    Unnamed: 9: preenchido com moda (N146/9)
+    Unnamed: 10: preenchido com mediana (1.47)
+    Fonte_Dados: preenchido com moda (IJ-138.2.xlsx)
+  ✓ Valores nulos tratados
+/home/strumendo/PycharmProjects/teste/sabo/sabo/Fase02/scripts/s02_preprocessing.py:926: UserWarning: Parsing dates in %Y-%m-%d format when dayfirst=True was specified. Pass `dayfirst=False` or specify a format to silence this warning.
+  prod_date = pd.to_datetime(row[date_col], dayfirst=True, errors='coerce')
+  ✓ Removidos 1599 registros pós-manutenção
+  ✓ Calculada variável 'Manutencao' (dias até manutenção)
+  ✓ Criada variável acumulativa: Qtd. Produzida_Acumulado
+  ✓ Criada variável acumulativa: Qtd. Refugada_Acumulado
+  ✓ Criada variável acumulativa: Qtd. Retrabalhada_Acumulado
+  ✓ Criada variável acumulativa: Consumo de massa no item em (Kg/100pçs)_Acumulado
+  Adicionando features de medições de desgaste...
+  ✓ Adicionadas 13 features de medição/desgaste
+  Calculando estatísticas por equipamento...
+  ✓ Estatísticas calculadas para 26 equipamentos
+  ✓ Estatísticas salvas em: equipment_stats.csv
+/home/strumendo/PycharmProjects/teste/sabo/sabo/Fase02/scripts/s02_preprocessing.py:760: UserWarning: DataFrame columns are not unique, some columns will be omitted.
+  stats_dict = stats.to_dict(orient="records")
+  ✓ Estatísticas salvas em: equipment_stats.json
+
+============================================================
+ETAPA 2 CONCLUÍDA
+============================================================
+
+Transformação: (42676, 15) → (13874, 98)
+Arquivo salvo: data_preprocessed.csv
+
+Colunas (98):
+   1. Data_de_Produção
+   2. Qtd_Produzida
+   3. Qtd_Refugada
+   4. Qtd_Retrabalhada
+   5. Fator_Un
+   6. Consumo_de_massa_no_item_em_Kg_100pçs
+   7. Unnamed:_10
+   8. Manutencao
+   9. dias_desde_epoch
+  10. mes
+  11. dia_semana
+  12. dia_do_ano
+  13. Qtd_Produzida_Acumulado
+  14. Qtd_Refugada_Acumulado
+  15. Qtd_Retrabalhada_Acumulado
+  16. Consumo_de_massa_no_item_em_Kg_100pçs_Acumulado
+  17. cilindro_max
+  18. cilindro_min
+  19. cilindro_variacao
+  20. desgaste_cilindro
+  21. fuso_max
+  22. fuso_min
+  23. fuso_variacao
+  24. desgaste_fuso
+  25. intervalo_manutencao
+  26. taxa_desgaste_cilindro
+  27. taxa_desgaste_fuso
+  28. indice_desgaste
+  29. desgaste_por_1000_pecas
+  30. dias_desde_ultima_manutencao
+  31. dias_desde_penultima_manutencao
+  32. n_preventivas_passadas
+  33. dias_desde_ultima_preventiva
+  34. intervalo_medio_passado
+  35. intervalo_ultimo_passado
+  36. desvio_padrao_intervalo_passado
+  37. tendencia_intervalo_passado
+  38. Equipamento_IJ_044
+  39. Equipamento_IJ_046
+  40. Equipamento_IJ_117
+  41. Equipamento_IJ_118
+  42. Equipamento_IJ_119
+  43. Equipamento_IJ_120
+  44. Equipamento_IJ_121
+  45. Equipamento_IJ_122
+  46. Equipamento_IJ_123
+  47. Equipamento_IJ_124
+  48. Equipamento_IJ_125
+  49. Equipamento_IJ_129
+  50. Equipamento_IJ_130
+  51. Equipamento_IJ_131
+  52. Equipamento_IJ_132
+  53. Equipamento_IJ_133
+  54. Equipamento_IJ_134
+  55. Equipamento_IJ_135
+  56. Equipamento_IJ_136
+  57. Equipamento_IJ_137
+  58. Equipamento_IJ_138
+  59. Equipamento_IJ_139
+  60. Equipamento_IJ_151
+  61. Equipamento_IJ_152
+  62. Equipamento_IJ_156
+  63. Equipamento_IJ_164
+  64. Descrição_da_massa_Composto_EP_4053_1
+  65. Descrição_da_massa_Composto_F424_40_MARROM
+  66. Descrição_da_massa_Composto_F424_50
+  67. Descrição_da_massa_Composto_F424_51
+  68. Descrição_da_massa_Composto_F424_64
+  69. Descrição_da_massa_Composto_F424_85
+  70. Descrição_da_massa_Composto_F444_1
+  71. Descrição_da_massa_Composto_FP75614_49
+  72. Descrição_da_massa_Composto_MASSA_F403_32
+  73. Descrição_da_massa_Composto_MASSA_F420_134
+  74. Descrição_da_massa_Composto_MASSA_F420_191
+  75. Descrição_da_massa_Composto_MASSA_F420_201
+  76. Descrição_da_massa_Composto_MASSA_F420_306
+  77. Descrição_da_massa_Composto_MASSA_F420_95
+  78. Descrição_da_massa_Composto_MASSA_F420_96
+  79. Descrição_da_massa_Composto_MASSA_S315_1_DIAM_CORDÃO_8MM_SEM_R_0345
+  80. Descrição_da_massa_Composto_MASSA_S315_10_MACARRÃO_EXTR__8+___1mm
+  81. Descrição_da_massa_Composto_MASSA_S316_2
+  82. Descrição_da_massa_Composto_N_110_2
+  83. Descrição_da_massa_Composto_N_126_2
+  84. Descrição_da_massa_Composto_N_142_44
+  85. Descrição_da_massa_Composto_N_142_67
+  86. Descrição_da_massa_Composto_N_158_3
+  87. Descrição_da_massa_Composto_N_184_2
+  88. Descrição_da_massa_Composto_N144_83
+  89. Descrição_da_massa_Composto_N144_85
+  90. Descrição_da_massa_Composto_N146_9
+  91. Descrição_da_massa_Composto_N148_18
+  92. Descrição_da_massa_Composto_N190_30
+  93. Descrição_da_massa_Composto_P_210_1
+  94. Descrição_da_massa_Composto_P212_1
+  95. Descrição_da_massa_Composto_P248_40
+  96. Descrição_da_massa_Composto_P250_14
+  97. Descrição_da_massa_Composto_RC_21_65
+  98. Cód_Un_PC
+
+📊 Histórico registrado para: s02_preprocessing
+
+======================================================================
+ETAPA 3: ANÁLISE EXPLORATÓRIA (EDA)
+Descrição: Estatísticas, Gráficos, Correlação
+Entradas:  data_preprocessed.csv
+Saídas:    data_eda.csv, eda_report.txt, eda_plots/
+======================================================================
+============================================================
+ETAPA 3: ANÁLISE EXPLORATÓRIA DE DADOS (EDA)
+(Conforme fluxos.drawio)
+============================================================
+
+[1/5] Carregando dados pré-processados...
+  Carregado: 13874 registros, 98 colunas
+
+----------------------------------------
+CÁLCULO DE ESTATÍSTICAS
+----------------------------------------
+
+[2/5] Média, Desvio Padrão, Quartis...
+
+  Calculando estatísticas descritivas...
+  ✓ Estatísticas calculadas para 36 colunas numéricas
+
+----------------------------------------
+GRÁFICOS DE DISTRIBUIÇÃO
+----------------------------------------
+
+[3/5] Histogramas e Boxplots...
+
+  Gerando histogramas...
+  ✓ Histogramas salvos: eda_plots/histogramas.png
+
+  Gerando boxplots...
+  ✓ Boxplots salvos: eda_plots/boxplots.png
+
+----------------------------------------
+ANÁLISE DE CORRELAÇÃO
+----------------------------------------
+
+[4/5] Heatmaps e Dispersão...
+
+  Calculando matriz de correlação...
+
+  Top 10 correlações com 'Manutencao':
+    dias_desde_ultima_manutencao: -0.4668
+    intervalo_manutencao: 0.3889
+    dias_desde_ultima_preventiva: -0.3754
+    dias_desde_penultima_manutencao: -0.3744
+    dias_desde_epoch: -0.3387
+    Consumo_de_massa_no_item_em_Kg_100pçs_Acumulado: -0.1857
+    n_preventivas_passadas: -0.1320
+    tendencia_intervalo_passado: 0.1315
+    mes: 0.1196
+    dia_do_ano: 0.1135
+
+  Gerando heatmap de correlação...
+  ✓ Heatmap salvo: eda_plots/heatmap_correlacao.png
+
+  Gerando gráficos de dispersão...
+  ✓ Dispersão salvo: eda_plots/dispersao_target.png
+
+----------------------------------------
+INSIGHTS
+----------------------------------------
+
+[5/5] Gerando insights automáticos...
+  1. Dataset contém 13874 registros e 98 features.
+  2. Variável target 'Manutencao': média de 252.3 dias, variando de 0 a 975 dias.
+  3. Atenção: 12 colunas com >5% de outliers: Qtd_Produzida, Qtd_Refugada, Fator_Un, Consumo_de_massa_no_item_em_Kg_100pçs, Qtd_Produzida_Acumulado
+  ✓ Relatório salvo: eda_report.txt
+
+============================================================
+ETAPA 3 CONCLUÍDA
+============================================================
+
+Arquivos gerados:
+  - data_eda.csv (dados para modelagem)
+  - eda_report.txt (relatório estatístico)
+  - 4 gráficos em eda_plots/
+
+📊 Histórico registrado para: s03_eda
+
+======================================================================
+ETAPA 3b: ANÁLISES AVANÇADAS DE EDA
+Descrição: Gráficos avançados: correlação, urgência, scatter
+Entradas:  data_eda.csv
+Saídas:    eda_plots/*.png (avançados)
+======================================================================
+============================================================
+ETAPA 3b: ANÁLISES AVANÇADAS DE EDA
+(Baseado em exploratory_analise/ e exploratory_dado_proposto/)
+============================================================
+
+[1/7] Carregando dados...
+  Carregado: 13874 registros, 98 colunas
+
+----------------------------------------
+GERANDO ANÁLISES AVANÇADAS
+----------------------------------------
+
+[2/7] Matriz de correlação completa...
+
+  Gerando matriz de correlação completa...
+  ✓ Matriz de correlação salva: eda_plots/correlation_matrix_full.png
+
+[3/7] Consumo vs Produção...
+
+  Gerando gráfico Consumo vs Produção...
+  ✓ Gráfico consumo vs produção salvo: eda_plots/consumo_vs_producao.png
+
+[4/7] Análise temporal...
+
+  Gerando análise temporal...
+  ✓ Análise temporal salva: eda_plots/analise_temporal.png
+
+[5/7] Matriz de urgência...
+
+  Gerando matriz de urgência...
+  ✓ Matriz de urgência salva: eda_plots/matriz_urgencia.png
+
+[6/7] Scatter plots de features (por equipamento)...
+
+  Gerando scatter plots de features (colorido por equipamento)...
+  ✓ Scatter plots salvos: eda_plots/scatter_plots_features.png
+    Equipamentos identificados: 26
+
+[7/7] Resumo por equipamento...
+
+  Gerando gráfico resumo por equipamento...
+  ✓ Gráfico resumo salvos: eda_plots/resumo_equipamentos.png
+    Total de equipamentos: 26
+
+============================================================
+ANÁLISES AVANÇADAS CONCLUÍDAS
+============================================================
+
+Gráficos gerados: 6
+  - eda_plots/correlation_matrix_full.png
+  - eda_plots/consumo_vs_producao.png
+  - eda_plots/analise_temporal.png
+  - eda_plots/matriz_urgencia.png
+  - eda_plots/scatter_plots_features.png
+  - eda_plots/resumo_equipamentos.png
+
+📊 Histórico registrado para: s03b_advanced_eda
+
+======================================================================
+ETAPA 4: MODELAGEM E TREINAMENTO
+Descrição: 4 Algoritmos: LR, DT, RF, XGBoost
+Entradas:  data_eda.csv
+Saídas:    models/*.joblib, train_test_split.npz
+======================================================================
+============================================================
+ETAPA 4: MODELAGEM E TREINAMENTO
+(Conforme fluxos.drawio)
+============================================================
+
+[1/7] Carregando dados pós-EDA...
+  Carregado: 13874 registros, 98 colunas
+
+[2/7] Preparando features e target...
+  ⚠ Removidas 1 colunas vazias/unnamed: ['Unnamed:_10']
+  ⚠ Removidas 1 features com data leakage: ['intervalo_manutencao']
+  ⚠ Removidas 11 features redundantes com OHE Equipamento: ['cilindro_max', 'cilindro_min', 'cilindro_variacao', 'desgaste_cilindro', 'fuso_max', 'fuso_min', 'fuso_variacao', 'desgaste_fuso', 'taxa_desgaste_cilindro', 'taxa_desgaste_fuso', 'indice_desgaste']
+  Features: 22
+  Target: Manutencao
+
+----------------------------------------
+DIVISÃO TREINO/TESTE
+----------------------------------------
+
+[3/7] Dividindo dados (80% treino / 20% teste)...
+
+  Divisão Treino/Teste (80%/20%):
+    Treino: 11099 amostras
+    Teste:  2775 amostras
+  ✓ Dados treino/teste salvos: train_test_split.npz
+
+----------------------------------------
+TREINAMENTO DOS MODELOS
+----------------------------------------
+
+[4/7] Treinando Regressão Linear...
+
+  [Algoritmo 1] Regressão Linear...
+    ✓ Modelo treinado
+
+[5/7] Treinando Decision Tree...
+
+  [Algoritmo 2] Decision Tree...
+    ✓ Modelo treinado
+
+[6/7] Treinando Random Forest...
+
+  [Algoritmo 3] Random Forest...
+    ✓ Modelo treinado
+
+[7/7] Treinando XGBoost...
+
+  [Algoritmo 4] XGBoost...
+    ✓ Modelo treinado
+
+----------------------------------------
+SALVANDO MODELOS
+----------------------------------------
+  ✓ Salvo: models/model_linear.joblib
+  ✓ Salvo: models/model_decision_tree.joblib
+  ✓ Salvo: models/model_random_forest.joblib
+  ✓ Salvo: models/model_xgboost.joblib
+
+============================================================
+ETAPA 4 CONCLUÍDA
+============================================================
+
+Modelos treinados: 4
+  - linear
+  - decision_tree
+  - random_forest
+  - xgboost
+
+Arquivos gerados:
+  - models/*.joblib (4 modelos)
+  - train_test_split.npz (dados treino/teste)
+
+📊 Histórico registrado para: s04_modeling
+
+======================================================================
+ETAPA 5: VALIDAÇÃO E AVALIAÇÃO
+Descrição: Métricas R², MSE, MAE + Seleção
+Entradas:  models/*.joblib, train_test_split.npz
+Saídas:    best_model.joblib, evaluation_report.txt
+======================================================================
+============================================================
+ETAPA 5: VALIDAÇÃO E AVALIAÇÃO
+(Conforme fluxos.drawio)
+============================================================
+
+[1/5] Carregando dados de teste (20%)...
+  Carregado: 2775 amostras de teste, 22 features
+
+[2/5] Carregando modelos treinados...
+  ✓ Carregado: linear
+  ✓ Carregado: decision_tree
+  ✓ Carregado: xgboost
+  ✓ Carregado: random_forest
+
+----------------------------------------
+TESTE NOS 20% DE DADOS
+----------------------------------------
+
+[3/5] Calculando métricas (R², MSE, MAE)...
+
+  Avaliando linear...
+    R²:   0.4936
+    MSE:  13063.04
+    MAE:  87.57
+    RMSE: 114.29
+
+  Avaliando decision_tree...
+    R²:   0.6149
+    MSE:  9933.27
+    MAE:  71.83
+    RMSE: 99.67
+
+  Avaliando xgboost...
+    R²:   0.8369
+    MSE:  4206.15
+    MAE:  39.43
+    RMSE: 64.85
+
+  Avaliando random_forest...
+    R²:   0.7095
+    MSE:  7493.86
+    MAE:  59.85
+    RMSE: 86.57
+
+----------------------------------------
+COMPARAÇÃO DE DESEMPENHO
+----------------------------------------
+
+============================================================
+RANKING DOS MODELOS (por R²)
+============================================================
+
+Rank   Modelo               R²         MSE          MAE         
+------------------------------------------------------------
+1      xgboost              0.8369     4206.15      39.43        
+2      random_forest        0.7095     7493.86      59.85        
+3      decision_tree        0.6149     9933.27      71.83        
+4      linear               0.4936     13063.04     87.57        
+
+[4/5] Selecionando melhor modelo...
+
+  ★ Melhor modelo: XGBOOST
+    R²:   0.8369
+    MSE:  4206.15
+    MAE:  39.43
+
+============================================================
+RANKING DOS MODELOS (por R²)
+============================================================
+
+Rank   Modelo               R²         MSE          MAE         
+------------------------------------------------------------
+1      xgboost              0.8369     4206.15      39.43        ★ MELHOR
+2      random_forest        0.7095     7493.86      59.85        
+3      decision_tree        0.6149     9933.27      71.83        
+4      linear               0.4936     13063.04     87.57        
+
+[5/5] Salvando resultados...
+  ✓ Melhor modelo salvo: best_model.joblib
+  ✓ Relatório salvo: evaluation_report.txt
+
+============================================================
+ETAPA 5 CONCLUÍDA
+============================================================
+
+Melhor modelo: XGBOOST
+  R²:  0.8369
+  MSE: 4206.15
+  MAE: 39.43
+
+Arquivos gerados:
+  - best_model.joblib
+  - evaluation_report.txt
+
+📊 Histórico registrado para: s05_evaluation
+   Melhor modelo: xgboost (MSE: 4206.1455)
+
+======================================================================
+ETAPA 6: GERAÇÃO DE RELATÓRIO
+Descrição: Relatório PDF com gráficos e métricas
+Entradas:  best_model.joblib, evaluation_report.txt, eda_plots/
+Saídas:    Relatorio_SABO_RX.pdf
+======================================================================
+============================================================
+ETAPA 6: GERAÇÃO DE RELATÓRIO
+============================================================
+
+[1/4] Carregando resultados do pipeline...
+
+[2/4] Gerando gráficos mensais por equipamento...
+  ✓ Carregados dados de 26 equipamentos
+  Gerando gráficos para 26 equipamentos, 6 meses...
+    Página 1: IJ-044, IJ-046, IJ-117, IJ-118, IJ-119, IJ-120, IJ-121, IJ-122
+    Página 2: IJ-123, IJ-124, IJ-125, IJ-129, IJ-130, IJ-131, IJ-132, IJ-133
+    Página 3: IJ-134, IJ-135, IJ-136, IJ-137, IJ-138, IJ-139, IJ-151, IJ-152
+    Página 4: IJ-156, IJ-164
+  ✓ 4 páginas de gráficos mensais geradas
+
+[2b/4] Gerando análise de consumo por equipamento × composto...
+  Gerando gráficos para 26 equipamentos...
+    Página 1: IJ-044, IJ-046, IJ-117, IJ-118, IJ-119, IJ-120, IJ-121, IJ-122
+    Página 2: IJ-123, IJ-124, IJ-125, IJ-129, IJ-130, IJ-131, IJ-132, IJ-133
+    Página 3: IJ-134, IJ-135, IJ-136, IJ-137, IJ-138, IJ-139, IJ-151, IJ-152
+    Página 4: IJ-156, IJ-164
+  ✓ 4 páginas de gráficos equipamento × composto geradas
+  ✓ Heatmap equipamento × composto: eda_plots/compound/compound_equipamento_heatmap.png
+
+[3/4] Gerando relatório versão R22...
+  ✓ Carregados dados de 26 equipamentos
+  Procurando gráficos em:
+    ✓ eda_plots
+    ✗ /home/strumendo/PycharmProjects/teste/sabo/sabo/Fase02/eda_plots
+    ✗ /home/strumendo/PycharmProjects/teste/sabo/sabo/Fase02/eda_plots
+    ✗ /home/strumendo/PycharmProjects/teste/sabo/sabo/exploratory_analise
+    ✗ /home/strumendo/PycharmProjects/teste/sabo/sabo/exploratory_dado_proposto/classification_images
+  ✓ Gráfico adicionado: correlation_matrix_full.png
+  ✓ Gráfico adicionado: heatmap_correlacao.png
+  ✓ Gráfico adicionado: consumo_vs_producao.png
+  ✓ Gráfico adicionado: analise_temporal.png
+  ✓ Gráfico adicionado: matriz_urgencia.png
+  ✓ Gráfico adicionado: scatter_plots_features.png
+  ✓ Gráfico adicionado: resumo_equipamentos.png
+  ✓ Gráfico adicionado: dispersao_target.png
+  Total de gráficos adicionados ao relatório: 8
+  ✓ Carregados dados de 26 equipamentos
+  ✓ Previsões ML geradas para 26 equipamentos
+  ✓ Relatório PDF gerado: Relatorio_SABO_R22.pdf
+
+[4/4] Finalizando...
+
+============================================================
+ETAPA 6 CONCLUÍDA
+============================================================
+
+Relatório gerado: Relatorio_SABO_R22.pdf
+
+Modelo documentado: XGBOOST
+  R²:  0.8369
+  MSE: 4206.15
+  MAE: 39.43
+
+📊 Histórico registrado para: s06_generate_report
+   Melhor modelo: best_metrics (MSE: 4206.1455)
+
+======================================================================
+ETAPA 7: HISTÓRICO DE MANUTENÇÃO + CRUZAMENTO COM PRODUÇÃO
+Descrição: Consolida Dados Manut*.xlsx (2025, 2026, …) e cruza com data/raw/
+Entradas:  data/manutencao/Dados Manut*.xlsx, data/raw/IJ-*.csv
+Saídas:    equipamentos_historico_completo.csv, equipamentos_historico_recente.csv, equipamentos_janelas_manutencao.csv, equipamentos_ociosidade.csv
+======================================================================
+[s07] Lendo 2 arquivo(s) de manutenção:
+       - Dados Manut - 27 Equip - 2025.xlsx
+       - Dados Manut - 27 Equip - 2026.xlsx
+[s07] 56 leituras históricas → equipamentos_historico_completo.csv
+[s07] 28 equipamentos (mais recente) → equipamentos_historico_recente.csv
+[s07] 78 janelas de manutenção → equipamentos_janelas_manutencao.csv
+[s07] 28 registros de ociosidade → equipamentos_ociosidade.csv
+
+📊 Histórico registrado para: s07_hist_manutencao
+
+======================================================================
+ETAPA 8: PRESCRIÇÃO DE PRÓXIMA MANUTENÇÃO POR EQUIPAMENTO
+Descrição: Integra desgaste + consumo de massa + ociosidade
+Entradas:  equipamentos_historico_completo.csv, equipamentos_historico_recente.csv, equipamentos_janelas_manutencao.csv, equipamentos_ociosidade.csv
+Saídas:    prescricao_manutencao.csv
+======================================================================
+[s08] Prescrições para 28 equipamentos → prescricao_manutencao.csv
+[s08] Top 5 por urgência:
+equipamento data_prescrita  dias_restantes urgencia  fator_desgaste  fator_massa  dias_ociosidade
+     IJ-124     20/09/2025            -219 ATRASADO             1.0       0.7000             27.0
+     IJ-046     29/09/2025            -210 ATRASADO             1.0       0.7000             27.0
+     IJ-125     03/11/2025            -175 ATRASADO             1.0       0.7000             27.0
+     IJ-131     18/11/2025            -160 ATRASADO             1.0       0.7000             27.0
+     IJ-139     18/12/2025            -130 ATRASADO             1.0       0.8352             27.0
+
+📊 Histórico registrado para: s08_prescricao_manutencao
+📄 Relatório salvo: history/reports/report_20260427_132210.txt
+
+✅ Execução salva: history/runs/run_20260427_132210.json
+
+======================================================================
+PIPELINE CONCLUÍDO!
+======================================================================
+
+Etapas executadas com sucesso: 10/7
+
+✓ Pipeline executado com sucesso!
+
+Melhor modelo: XGBOOST
+  R²:  0.8369
+  MSE: 4206.15
+  MAE: 39.43
+
+Relatório gerado: Relatorio_SABO_R22.pdf
+
+Arquivos de histórico:
+  - history/runs/run_20260427_132210.json
+  - history/reports/report_20260427_132210.txt
