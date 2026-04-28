@@ -1,0 +1,130 @@
+{
+  "run_id": "20260427_132210",
+  "timestamp": "2026-04-27T13:22:10.706398",
+  "steps": {
+    "s00_split_unified": {
+      "timestamp": "2026-04-27T13:22:10.712263",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s01_data_collection": {
+      "timestamp": "2026-04-27T13:22:11.298761",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s02_preprocessing": {
+      "timestamp": "2026-04-27T13:23:01.189902",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s03_eda": {
+      "timestamp": "2026-04-27T13:23:05.646706",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s03b_advanced_eda": {
+      "timestamp": "2026-04-27T13:24:26.767920",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s04_modeling": {
+      "timestamp": "2026-04-27T13:24:28.378122",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s05_evaluation": {
+      "timestamp": "2026-04-27T13:24:28.442561",
+      "models": {
+        "linear": {
+          "mse": 13063.03883439143,
+          "r2": 0.49358440270602133
+        },
+        "decision_tree": {
+          "mse": 9933.26772018503,
+          "r2": 0.6149164241665634
+        },
+        "xgboost": {
+          "mse": 4206.1455078125,
+          "r2": 0.8369401097297668
+        },
+        "random_forest": {
+          "mse": 7493.860333997891,
+          "r2": 0.709485074247198
+        }
+      },
+      "params": {},
+      "best_model": "xgboost",
+      "best_mse": 4206.1455078125,
+      "best_r2": 0.8369401097297668
+    },
+    "s06_generate_report": {
+      "timestamp": "2026-04-27T13:24:41.870609",
+      "models": {
+        "best_metrics": {
+          "mse": 4206.1455078125,
+          "r2": 0.8369401097297668
+        }
+      },
+      "params": {},
+      "best_model": "best_metrics",
+      "best_mse": 4206.1455078125,
+      "best_r2": 0.8369401097297668
+    },
+    "s07_hist_manutencao": {
+      "timestamp": "2026-04-27T13:24:42.254952",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    },
+    "s08_prescricao_manutencao": {
+      "timestamp": "2026-04-27T13:24:42.437925",
+      "models": {},
+      "params": {},
+      "best_model": null,
+      "best_mse": Infinity,
+      "best_r2": -Infinity
+    }
+  },
+  "summary": {
+    "total_steps": 10,
+    "best_models_per_step": {
+      "s05_evaluation": {
+        "model": "xgboost",
+        "mse": 4206.1455078125,
+        "r2": 0.8369401097297668,
+        "accuracy": null
+      },
+      "s06_generate_report": {
+        "model": "best_metrics",
+        "mse": 4206.1455078125,
+        "r2": 0.8369401097297668,
+        "accuracy": null
+      }
+    },
+    "overall_best": {
+      "step": "s05_evaluation",
+      "model": "xgboost",
+      "mse": 4206.1455078125
+    }
+  }
+}
