@@ -817,6 +817,16 @@
         "model": "xgboost",
         "mse": 4206.1455078125
       }
+    },
+    {
+      "run_id": "20260428_174441",
+      "timestamp": "2026-04-28T17:44:41.847407",
+      "total_steps": 1,
+      "overall_best": {
+        "step": "s06_generate_report",
+        "model": "best_metrics",
+        "mse": 4206.1455078125
+      }
     }
   ]
 }

@@ -1,0 +1,76 @@
+# Pipeline SABO — execução 20260428_174441
+# Início: 2026-04-28T17:44:41.847313
+# Comando: run_pipeline.py --step 6
+
+Log desta execução: history/logs/run_20260428_174441.log
+
+======================================================================
+ETAPA 6: GERAÇÃO DE RELATÓRIO
+Descrição: Relatório PDF com gráficos e métricas
+Entradas:  best_model.joblib, evaluation_report.txt, eda_plots/
+Saídas:    Relatorio_SABO_RX.pdf
+======================================================================
+============================================================
+ETAPA 6: GERAÇÃO DE RELATÓRIO
+============================================================
+
+[1/4] Carregando resultados do pipeline...
+
+[2/4] Gerando gráficos mensais por equipamento...
+  ✓ Carregados dados de 26 equipamentos
+  Gerando gráficos para 26 equipamentos, 6 meses...
+    Página 1: IJ-044, IJ-046, IJ-117, IJ-118, IJ-119, IJ-120, IJ-121, IJ-122
+    Página 2: IJ-123, IJ-124, IJ-125, IJ-129, IJ-130, IJ-131, IJ-132, IJ-133
+    Página 3: IJ-134, IJ-135, IJ-136, IJ-137, IJ-138, IJ-139, IJ-151, IJ-152
+    Página 4: IJ-156, IJ-164
+  ✓ 4 páginas de gráficos mensais geradas
+
+[2b/4] Gerando análise de consumo por equipamento × composto...
+  Gerando gráficos para 26 equipamentos...
+    Página 1: IJ-044, IJ-046, IJ-117, IJ-118, IJ-119, IJ-120, IJ-121, IJ-122
+    Página 2: IJ-123, IJ-124, IJ-125, IJ-129, IJ-130, IJ-131, IJ-132, IJ-133
+    Página 3: IJ-134, IJ-135, IJ-136, IJ-137, IJ-138, IJ-139, IJ-151, IJ-152
+    Página 4: IJ-156, IJ-164
+  ✓ 4 páginas de gráficos equipamento × composto geradas
+  ✓ Heatmap equipamento × composto: eda_plots/compound/compound_equipamento_heatmap.png
+
+[3/4] Gerando relatório versão R23...
+  ✓ Carregados dados de 26 equipamentos
+  Procurando gráficos em:
+    ✓ eda_plots
+    ✗ /home/strumendo/PycharmProjects/teste/sabo/sabo/Fase02/eda_plots
+    ✗ /home/strumendo/PycharmProjects/teste/sabo/sabo/Fase02/eda_plots
+    ✗ /home/strumendo/PycharmProjects/teste/sabo/sabo/exploratory_analise
+    ✗ /home/strumendo/PycharmProjects/teste/sabo/sabo/exploratory_dado_proposto/classification_images
+  ✓ Gráfico adicionado: correlation_matrix_full.png
+  ✓ Gráfico adicionado: heatmap_correlacao.png
+  ✓ Gráfico adicionado: consumo_vs_producao.png
+  ✓ Gráfico adicionado: analise_temporal.png
+  ✓ Gráfico adicionado: matriz_urgencia.png
+  ✓ Gráfico adicionado: scatter_plots_features.png
+  ✓ Gráfico adicionado: resumo_equipamentos.png
+  ✓ Gráfico adicionado: dispersao_target.png
+  Total de gráficos adicionados ao relatório: 8
+  ✓ Carregados dados de 26 equipamentos
+  ✓ CSV consolidado salvo: previsao_manutencao_consolidada.csv (26 equipamentos)
+  ✓ PPTX consolidado salvo: Apresentacoes_Componentes_Consolidado.pptx (26 arquivos mesclados)
+  ✓ Relatório PDF gerado: Relatorio_SABO_R23.pdf
+
+[4/4] Finalizando...
+
+============================================================
+ETAPA 6 CONCLUÍDA
+============================================================
+
+Relatório gerado: Relatorio_SABO_R23.pdf
+
+Modelo documentado: XGBOOST
+  R²:  0.8369
+  MSE: 4206.15
+  MAE: 39.43
+
+📊 Histórico registrado para: s06_generate_report
+   Melhor modelo: best_metrics (MSE: 4206.1455)
+📄 Relatório salvo: history/reports/report_20260428_174441.txt
+
+✅ Execução salva: history/runs/run_20260428_174441.json
