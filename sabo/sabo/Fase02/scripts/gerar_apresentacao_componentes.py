@@ -1220,7 +1220,7 @@ def _slide_conclusoes(prs, rel: RelatorioEquipamento):
     if rel.prescricao.data_prescrita:
         cards.append((
             "Manutenção Planejada",
-            f"Próxima intervenção prevista para {rel.prescricao.data_prescrita} — "
+            f"Próxima intervenção prescrita para {rel.prescricao.data_prescrita} — "
             f"{rel.prescricao.dias_restantes or '—'} dias de folga operacional",
             COLOR_WARNING,
         ))

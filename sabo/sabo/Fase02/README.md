@@ -12,20 +12,21 @@ Este pipeline implementa um fluxo completo de ciência de dados para manutençã
 
 **Período dos Dados:** 19/03/2023 a 31/01/2026 (34 meses)
 
-**Melhor Modelo:** XGBoost (R² = 0.9984, MAE = 0.72 dias)
+**Melhor Modelo:** XGBoost (R² = 0.8369, MAE = 39,43 dias, MSE = 4206,15) — última execução `R23` (2026-04-28)
 
 **Equipamentos Monitorados:** 27 extrusoras Y125 (IJ-044 a IJ-164)
 
 ### Diferencial: Previsão Prescritiva
 
-O sistema oferece **duas abordagens de previsão**:
+O sistema oferece **três fontes de previsão de manutenção**, consolidadas em um único CSV:
 
-| Abordagem | Descrição | Uso |
-|-----------|-----------|-----|
-| **Histórica** | Baseada no intervalo entre trocas passadas | Referência |
-| **Prescritiva (ML)** | Baseada no estado atual do equipamento | **Recomendada** |
+| Fonte | Descrição | Origem |
+|-------|-----------|--------|
+| **Histórica** | Última troca + intervalo médio entre trocas | `equipment_stats.json` |
+| **SAP (RM.195)** | Próxima preventiva agendada no SAP | `Histórico Geral Preventivas RM.195 - 27 Equip IRP´s.xlsx` |
+| **Prescritiva (ML)** | Data prescrita pelo modelo XGBoost com base no estado atual | `prescricao_manutencao.csv` |
 
-A previsão ML considera 23 variáveis incluindo produção acumulada, índice de desgaste, medições de cilindro/fuso e taxa de refugo para determinar quando cada equipamento precisará de manutenção.
+A previsão ML considera produção acumulada, índice de desgaste, medições de cilindro/fuso, taxa de refugo, consumo de massa e tempo de ociosidade para determinar quando cada equipamento precisará de manutenção. A consolidação das três fontes é gravada em `outputs/previsao_manutencao_consolidada.csv` e referenciada como link clicável no Capítulo 11 do PDF.
 
 ## Requisitos
 
@@ -86,13 +87,20 @@ Fase02/
 ├── scripts/                     # Scripts do pipeline
 │   ├── run_pipeline.py          # Orquestrador principal
 │   ├── auto_pipeline.py         # Automação com detecção de alterações
+│   ├── s00_split_unified.py     # Etapa 0: Split de planilhas unificadas
 │   ├── s01_data_collection.py   # Etapa 1: Coleta e integração
 │   ├── s02_preprocessing.py     # Etapa 2: Pré-processamento
 │   ├── s03_eda.py               # Etapa 3: Análise exploratória
 │   ├── s03b_advanced_eda.py     # Etapa 3b: EDA avançado
 │   ├── s04_modeling.py          # Etapa 4: Modelagem
 │   ├── s05_evaluation.py        # Etapa 5: Avaliação
-│   ├── s06_generate_report.py   # Etapa 6: Relatório PDF
+│   ├── s06_generate_report.py   # Etapa 6: Relatório PDF + CSV/PPTX consolidados (Cap. 11)
+│   ├── s07_hist_manutencao.py   # Etapa 7: Histórico de manutenção por equipamento
+│   ├── s08_prescricao_manutencao.py     # Etapa 8: Data prescrita pelo ML
+│   ├── gerar_relatorio_componentes_mensal.py  # Geração dos MD por equipamento
+│   ├── gerar_apresentacao_componentes.py      # Geração dos PPTX/PDF por equipamento
+│   ├── append_capitulo_17.py    # Anexa o Capítulo 17 ao último PDF
+│   ├── append_capitulo_18_manutencao.py # Anexa o Capítulo 18 (consumo + manutenção)
 │   └── history_manager.py       # Gerenciador de histórico
 │
 ├── config/
@@ -110,8 +118,13 @@ Fase02/
     ├── eda_plots/               # Gráficos gerados
     ├── models/                  # Modelos treinados
     ├── history/                 # Histórico de execuções
-    ├── equipment_stats.csv      # Estatísticas por equipamento (NOVO!)
-    ├── equipment_stats.json     # Estatísticas em JSON (NOVO!)
+    ├── relatorios_mensais_componentes/        # MD por equipamento
+    ├── relatorios_mensais_componentes_ppt/    # PPTX/PDF por equipamento (27 IJ-*.pptx)
+    ├── equipment_stats.csv      # Estatísticas por equipamento
+    ├── equipment_stats.json     # Estatísticas em JSON
+    ├── prescricao_manutencao.csv               # Saída do s08 (data prescrita ML)
+    ├── previsao_manutencao_consolidada.csv     # NOVO! Cap. 11 — histórico × SAP × ML
+    ├── Apresentacoes_Componentes_Consolidado.pptx  # NOVO! Cap. 11 — merge dos PPTX
     ├── .data_state.json         # Estado para automação
     └── Relatorio_SABO_RX.pdf    # Relatório final
 ```
@@ -445,15 +458,25 @@ Modelo selecionado: XGBOOST
 │  → Saída: best_model.joblib, evaluation_report.txt              │
 ├─────────────────────────────────────────────────────────────────┤
 │  ETAPA 6: GERAÇÃO DE RELATÓRIO                                  │
-│  - Relatório PDF no formato padrão SABO                         │
+│  - Relatório PDF no formato padrão SABO (sumário 11→17)         │
+│  - Capítulo 11: gera CSV consolidado + PPTX consolidado e os    │
+│    inclui como links clicáveis no PDF                           │
 │  - Inclusão de gráficos e métricas                              │
-│  → Saída: Relatorio_SABO_RX.pdf                                 │
+│  → Saída: Relatorio_SABO_RX.pdf,                                │
+│           previsao_manutencao_consolidada.csv,                  │
+│           Apresentacoes_Componentes_Consolidado.pptx            │
 ├─────────────────────────────────────────────────────────────────┤
-│  ETAPA 7: ESTATÍSTICAS POR EQUIPAMENTO (NOVO!)                  │
-│  - Agregação de métricas por equipamento                        │
-│  - Produção, refugo, retrabalho, consumo de massa               │
-│  - Datas de manutenção (última e penúltima)                     │
-│  → Saída: equipment_stats.csv, equipment_stats.json             │
+│  ETAPA 7: HISTÓRICO DE MANUTENÇÃO POR EQUIPAMENTO               │
+│  - Cruza Dados Manut*.xlsx (todas as fotografias) com data_raw  │
+│  - Janelas de manutenção por equipamento e ociosidade           │
+│  → Saída: equipamentos_historico_*.csv,                         │
+│           equipamentos_janelas_manutencao.csv,                  │
+│           equipamentos_ociosidade.csv                           │
+├─────────────────────────────────────────────────────────────────┤
+│  ETAPA 8: PRESCRIÇÃO DE PRÓXIMA MANUTENÇÃO POR EQUIPAMENTO      │
+│  - Combina desgaste medido + consumo de massa + ociosidade      │
+│  - Calcula data_prescrita por equipamento                       │
+│  → Saída: prescricao_manutencao.csv                             │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -567,8 +590,11 @@ print(medicoes["IJ-125"])
 | `data_preprocessed.csv` | Dados limpos e transformados (90 colunas) |
 | `data_eda.csv` | Dados prontos para modelagem |
 | `train_test_split.npz` | Divisão treino/teste |
-| `equipment_stats.csv` | **NOVO!** Estatísticas agregadas por equipamento |
-| `equipment_stats.json` | **NOVO!** Estatísticas em formato JSON |
+| `equipment_stats.csv` | Estatísticas agregadas por equipamento |
+| `equipment_stats.json` | Estatísticas em formato JSON |
+| `prescricao_manutencao.csv` | Saída do `s08`: data prescrita pelo ML por equipamento |
+| `previsao_manutencao_consolidada.csv` | **NOVO! (R23)** Capítulo 11 — combina histórico × SAP × ML por equipamento |
+| `Apresentacoes_Componentes_Consolidado.pptx` | **NOVO! (R23)** Capítulo 11 — merge dos 27 PPTX de componentes em um único arquivo |
 
 ### Estatísticas por Equipamento (equipment_stats.csv)
 
@@ -614,39 +640,31 @@ O arquivo contém as seguintes métricas para cada equipamento:
 | `evaluation_report.txt` | Métricas de avaliação |
 | `Relatorio_SABO_RX.pdf` | Relatório final completo |
 
-### Interpretando as Tabelas de Previsão (Seção 11 do PDF)
+### Capítulo 11 do PDF — Previsão de Troca de Peças (CSV consolidado)
 
-O relatório PDF inclui três tabelas na seção 11:
+A partir da versão **R23**, o Capítulo 11 do PDF não traz mais as tabelas 11.1–11.4. Em vez disso, o capítulo contém um texto explicativo seguido de **dois links clicáveis**:
 
-#### Tabela 11.1 - Previsão Histórica
-Cálculo simples baseado no intervalo entre trocas:
-```
-Próxima Troca = Última Troca + Intervalo Histórico
-```
-**Limitação:** Não considera o estado atual do equipamento.
+1. **`previsao_manutencao_consolidada.csv`** — uma linha por equipamento com 9 colunas:
+   - `Equipamento`
+   - `Ultima_Data_Producao` (max `Data de Produção` do equipamento em `data_raw.csv`)
+   - `Ultima_Manutencao` (`data_ultima_manutencao` em `equipment_stats.json`)
+   - `Intervalo_Penultima_Ultima_Manutencao_dias`
+   - `Data_Proxima_Manutencao_SAP` (primeira preventiva RM.195 com data ≥ hoje)
+   - `Dias_Ultima_Manutencao_ate_SAP`
+   - `Dias_SAP_ate_Hoje`
+   - `Data_Proxima_Manutencao_ML` (do `prescricao_manutencao.csv`)
+   - `Diferenca_ML_vs_SAP_dias` (positivo = ML após SAP; negativo = ML antes do SAP)
+2. **`Apresentacoes_Componentes_Consolidado.pptx`** — concatenação, via `python-pptx`, de todos os `IJ-*.pptx` em `outputs/relatorios_mensais_componentes_ppt/` em um único arquivo.
 
-#### Tabela 11.2 - Previsão Prescritiva (ML) ⭐ Recomendada
-O modelo XGBoost analisa 23 variáveis para prever quando cada equipamento precisará de manutenção:
-- Produção acumulada desde a última troca
-- Índice de desgaste (combinação de cilindro + fuso)
-- Taxa de refugo e retrabalho
-- Medições atuais de cilindro e fuso
+**Como interpretar a diferença ML vs SAP:**
 
-**Exemplo de interpretação:**
-```
-IJ-129: Previsão ML = 45 dias, Status = ATENÇÃO
-→ O modelo identificou alto índice de desgaste (80%)
-→ Recomenda-se programar manutenção em breve
-```
+| Diferença | Significado | Ação sugerida |
+|-----------|-------------|---------------|
+| `< -30 dias` | ML prescreve manutenção bem antes do SAP | Antecipar a OM |
+| `entre -30 e +30` | Previsões alinhadas | Seguir o agendamento SAP |
+| `> +30 dias` | Equipamento em bom estado | Avaliar adiamento |
 
-#### Tabela 11.3 - Comparação Histórico vs ML
-Mostra a diferença entre as duas abordagens:
-
-| Recomendação | Significado | Ação |
-|--------------|-------------|------|
-| **Antecipar** | ML prevê antes do histórico | Programar manutenção mais cedo |
-| **Pode adiar** | Equipamento em bom estado | Pode aguardar mais tempo |
-| **Conforme** | Previsões similares | Seguir planejamento normal |
+> O Capítulo 11 anterior (subitens 11.1 a 11.4 com tabelas Histórica, Prescritiva, Comparação e Fatores) foi removido do PDF para enxugar o relatório, mas as três fontes que o alimentavam (`equipment_stats.json`, preventivas RM.195 e `prescricao_manutencao.csv`) seguem disponíveis e agora aparecem juntas no CSV.
 
 ### Gráfico de Resumo por Equipamento (Figura 7)
 
@@ -696,16 +714,18 @@ Este gráfico permite identificar rapidamente:
 | MAE | Erro absoluto médio | Erro médio em dias |
 | RMSE | Raiz do MSE | Erro em mesma escala do target |
 
-### Resultados Atuais (v3.3.0)
+### Resultados Atuais (R23 — 2026-04-28)
 
 ```
 Rank   Modelo           R²       MSE        MAE
 ─────────────────────────────────────────────────
-1      XGBoost          0.9984   49.62      0.72   ★ MELHOR
-2      Random Forest    0.9944   172.37     2.65
-3      Decision Tree    0.9628   1146.41    19.98
-4      Linear           0.6692   10195.02   79.91
+1      XGBoost          0.8369   4206.15    39.43   ★ MELHOR
 ```
+
+> Os números acima são da execução `R23`, com o dataset depurado após as correções de
+> ingestão (dupla contagem de `DadosProducao*.xlsx`, sobrescrita silenciosa do baseline
+> e parsing ISO/dayfirst). Para histórico completo de cada execução, consulte
+> `outputs/history/runs/run_<id>.json`.
 
 > **Correções aplicadas (v3.2.0):**
 > - Removida feature `intervalo_manutencao` por data leakage
@@ -714,7 +734,48 @@ Rank   Modelo           R²       MSE        MAE
 
 ## Alterações Recentes
 
-### v3.3.0 (Atual) - Previsão Prescritiva com ML
+### R23 (2026-04-28) — Capítulo 11 consolidado em CSV + reordenação do sumário
+
+#### Item 7.4 — Histórico de Troca de Peças por Equipamento
+- **Removida** a frase "Fonte: Dados Manut - 27 Equip - 2025.xlsx" da descrição do bloco.
+- Tabela agora tem colunas: `#` (índice), `Equipamento`, `Penúltima Troca`, `Última Troca`, `Intervalo (dias)`, `Média Hist. (dias)`, `Mín (dias)`, `Máx (dias)`. As três últimas colunas mostram, por equipamento, a estatística do intervalo entre manutenções (vindas de `equipment_stats.json` → `media/min/max_dias_manutencao`).
+- A penúltima troca é lida de `data_penultima_manutencao` no mesmo JSON.
+
+#### Item 7.5 — Features Utilizadas no Modelo Final
+- "Features Numéricas Originais" e "Features Acumuladas" agora aparecem como **lista com bullets**, uma feature por linha (sem truncamento). Apenas o bloco de "Features de Encoding" mantém apresentação compacta para evitar tabela enorme.
+
+#### Item 11 — Previsão de Troca de Peças (reformulado)
+- **Removidos** os subitens 11.1 (Histórica), 11.2 (Prescritiva), 11.3 (Comparação) e 11.4 (Fatores).
+- Em vez disso, o Capítulo 11 agora gera dois artefatos e os referencia como **links clicáveis** no PDF:
+  - `outputs/previsao_manutencao_consolidada.csv` — uma linha por equipamento, 9 colunas (`Equipamento`, `Ultima_Data_Producao`, `Ultima_Manutencao`, `Intervalo_Penultima_Ultima_Manutencao_dias`, `Data_Proxima_Manutencao_SAP`, `Dias_Ultima_Manutencao_ate_SAP`, `Dias_SAP_ate_Hoje`, `Data_Proxima_Manutencao_ML`, `Diferenca_ML_vs_SAP_dias`).
+  - `outputs/Apresentacoes_Componentes_Consolidado.pptx` — concatena todos os `IJ-*.pptx` da pasta `outputs/relatorios_mensais_componentes_ppt/` em um único arquivo, via `python-pptx` (clonagem de `<p:sp>`, relacionamentos de mídia preservados).
+
+#### Reordenação do sumário
+A partir do **R23** o sumário do PDF segue esta ordem:
+
+| Ordem | Capítulo |
+|-------|----------|
+| 11 | Previsão de Troca de Peças (CSV + PPTX consolidados) |
+| **12** | **Análise Mensal por Equipamento** *(antes era o 16)* |
+| 13 | Considerações *(antes era o 12)* |
+| 14 | Próximos Passos *(antes era o 13)* |
+| 15 | Recomendações *(antes era o 14)* |
+| 16 | Considerações Finais *(antes era o 15)* |
+| 17 | Consumo de Massa por Equipamento e Composto |
+
+#### Novas funções em `s06_generate_report.py`
+- `_load_sap_scheduled_dates()` — lê `Histórico Geral Preventivas RM.195*.xlsx` e devolve `{equip: [datas ordenadas]}`.
+- `_load_ml_predictions()` — lê `prescricao_manutencao.csv` e devolve `{equip: data_prescrita}`.
+- `_load_last_production_dates()` — lê `data_raw.csv` e devolve `{equip: max(Data de Produção)}`.
+- `generate_previsao_manutencao_csv(equip_data)` — escreve o CSV consolidado.
+- `merge_componentes_pptx()` — consolida os PPTX por equipamento via `python-pptx` (cópia profunda dos elementos do slide e relacionamentos de imagens/charts/mídia).
+
+#### Métricas do modelo nesta versão (R23)
+- XGBoost: R² = 0,8369 · MSE = 4206,15 · MAE = 39,43
+
+---
+
+### v3.3.0 - Previsão Prescritiva com ML
 
 #### Novas Tabelas de Previsão no Relatório (Seção 11)
 

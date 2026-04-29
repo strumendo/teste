@@ -315,7 +315,7 @@ VARIAVEIS_PIPELINE = {
     # =========================================================================
     "troca_pecas_equipamentos": {
         "titulo": "Histórico de Troca de Peças por Equipamento",
-        "descricao": "Datas das trocas efetivas de peças (substituição de componentes) e intervalo de operação para cada equipamento. Fonte: Dados Manut - 27 Equip - 2025.xlsx",
+        "descricao": "Datas das trocas efetivas de peças (substituição de componentes) e intervalo de operação para cada equipamento.",
         "equipamentos": {}  # Será preenchido dinamicamente
     }
 }
@@ -342,13 +342,13 @@ def predict_maintenance_with_ml(equip_data: dict) -> dict:
         model_path = Path("models/best_model.joblib")
 
     if not model_path.exists():
-        print("  ⚠ Modelo ML não encontrado. Previsões ML indisponíveis.")
+        print("  ⚠ Modelo ML não encontrado. Prescrições ML indisponíveis.")
         return predictions
 
     # Carregar dados de treino para obter nomes das features
     train_data_path = Path("train_test_split.npz")
     if not train_data_path.exists():
-        print("  ⚠ Dados de treino não encontrados. Previsões ML indisponíveis.")
+        print("  ⚠ Dados de treino não encontrados. Prescrições ML indisponíveis.")
         return predictions
 
     try:
@@ -365,7 +365,7 @@ def predict_maintenance_with_ml(equip_data: dict) -> dict:
         # Carregar dados EDA para obter último registro de cada equipamento
         eda_path = Path("data_eda.csv")
         if not eda_path.exists():
-            print("  ⚠ data_eda.csv não encontrado. Previsões ML indisponíveis.")
+            print("  ⚠ data_eda.csv não encontrado. Prescrições ML indisponíveis.")
             return predictions
 
         df_eda = pd.read_csv(eda_path)
@@ -402,12 +402,218 @@ def predict_maintenance_with_ml(equip_data: dict) -> dict:
                     # Garantir valor positivo e arredondar
                     predictions[equip] = max(0, int(round(pred)))
 
-        print(f"  ✓ Previsões ML geradas para {len(predictions)} equipamentos")
+        print(f"  ✓ Prescrições ML geradas para {len(predictions)} equipamentos")
 
     except Exception as e:
-        print(f"  ⚠ Erro ao gerar previsões ML: {e}")
+        print(f"  ⚠ Erro ao gerar prescrições ML: {e}")
 
     return predictions
+
+
+def _load_sap_scheduled_dates() -> dict:
+    """
+    Lê o XLSX 'Histórico Geral Preventivas RM.195' e devolve, por equipamento,
+    a lista de datas agendadas (ordem ascendente) como pd.Timestamp.
+    """
+    candidates = [
+        Path("../data/manutencao"),
+        Path("data/manutencao"),
+        Path(__file__).resolve().parent.parent / "data" / "manutencao",
+    ]
+    fp = None
+    for d in candidates:
+        if d.exists():
+            matches = list(d.glob("Histórico Geral Preventivas*.xlsx"))
+            if matches:
+                fp = matches[0]
+                break
+    if fp is None:
+        print("  ⚠ Arquivo de preventivas RM.195 não encontrado para SAP")
+        return {}
+    try:
+        df = pd.read_excel(fp)
+    except Exception as e:
+        print(f"  ⚠ Erro ao ler preventivas: {e}")
+        return {}
+    equip_col = next((c for c in df.columns if c.strip().lower() == "equipamento"), None)
+    date_col = next((c for c in df.columns if "iníc" in c.lower() or "inic" in c.lower()), None)
+    if equip_col is None or date_col is None:
+        return {}
+    df = df[[equip_col, date_col]].copy()
+    df[date_col] = pd.to_datetime(df[date_col], errors="coerce")
+    df = df.dropna(subset=[date_col])
+    out: dict = {}
+    for equip, grp in df.groupby(equip_col):
+        out[str(equip).strip()] = sorted(grp[date_col].tolist())
+    return out
+
+
+def _load_ml_predictions() -> dict:
+    """
+    Carrega outputs/prescricao_manutencao.csv e retorna {equip: pd.Timestamp data_prescrita}.
+    """
+    fp = Path("prescricao_manutencao.csv")
+    if not fp.exists():
+        return {}
+    try:
+        df = pd.read_csv(fp)
+    except Exception as e:
+        print(f"  ⚠ Erro ao ler prescricao_manutencao.csv: {e}")
+        return {}
+    if "equipamento" not in df.columns or "data_prescrita" not in df.columns:
+        return {}
+    df["data_prescrita"] = pd.to_datetime(df["data_prescrita"], errors="coerce", dayfirst=True)
+    out = {}
+    for _, r in df.iterrows():
+        if pd.notna(r["data_prescrita"]):
+            out[str(r["equipamento"]).strip()] = r["data_prescrita"]
+    return out
+
+
+def _load_last_production_dates() -> dict:
+    """
+    Lê outputs/data_raw.csv e devolve {equip: pd.Timestamp última_data_producao}.
+    """
+    fp = Path("data_raw.csv")
+    if not fp.exists():
+        return {}
+    try:
+        df = pd.read_csv(fp, usecols=["Data de Produção", "Equipamento"])
+    except Exception as e:
+        print(f"  ⚠ Erro ao ler data_raw.csv: {e}")
+        return {}
+    df["Data de Produção"] = pd.to_datetime(df["Data de Produção"], errors="coerce")
+    df = df.dropna(subset=["Data de Produção", "Equipamento"])
+    return df.groupby("Equipamento")["Data de Produção"].max().to_dict()
+
+
+def generate_previsao_manutencao_csv(equip_data: dict, output_path: str = "previsao_manutencao_consolidada.csv") -> str:
+    """
+    Gera CSV consolidado de prescrição de manutenção por equipamento.
+
+    Colunas:
+      Equipamento, Ultima_Data_Producao, Ultima_Manutencao,
+      Intervalo_Penultima_Ultima_Manutencao_dias,
+      Data_Proxima_Manutencao_SAP, Dias_Ultima_Manutencao_ate_SAP,
+      Dias_SAP_ate_Hoje, Data_Proxima_Manutencao_ML,
+      Diferenca_ML_vs_SAP_dias
+    """
+    today = pd.Timestamp(datetime.now().date())
+    sap = _load_sap_scheduled_dates()
+    ml = _load_ml_predictions()
+    last_prod = _load_last_production_dates()
+
+    rows = []
+    for equip, dados in sorted(equip_data.items()):
+        if not isinstance(dados, dict):
+            continue
+        ultima_str = dados.get("data_ultima_manutencao") or dados.get("ultima_troca")
+        penultima_str = dados.get("data_penultima_manutencao")
+        try:
+            ultima_dt = pd.to_datetime(ultima_str) if ultima_str else pd.NaT
+        except Exception:
+            ultima_dt = pd.NaT
+        try:
+            penultima_dt = pd.to_datetime(penultima_str) if penultima_str else pd.NaT
+        except Exception:
+            penultima_dt = pd.NaT
+        intervalo_dias = (ultima_dt - penultima_dt).days if pd.notna(ultima_dt) and pd.notna(penultima_dt) else None
+
+        prod_dt = last_prod.get(equip)
+        if prod_dt is None:
+            for k, v in last_prod.items():
+                if str(k).strip() == equip:
+                    prod_dt = v
+                    break
+
+        sap_list = sap.get(equip, [])
+        sap_proxima = next((d for d in sap_list if d >= today), None)
+
+        ml_dt = ml.get(equip)
+
+        dias_ult_ate_sap = (sap_proxima - ultima_dt).days if (sap_proxima is not None and pd.notna(ultima_dt)) else None
+        dias_sap_hoje = (sap_proxima - today).days if sap_proxima is not None else None
+        dif_ml_sap = (ml_dt - sap_proxima).days if (sap_proxima is not None and ml_dt is not None) else None
+
+        rows.append({
+            "Equipamento": equip,
+            "Ultima_Data_Producao": prod_dt.strftime("%Y-%m-%d") if isinstance(prod_dt, pd.Timestamp) and pd.notna(prod_dt) else "",
+            "Ultima_Manutencao": ultima_dt.strftime("%Y-%m-%d") if pd.notna(ultima_dt) else "",
+            "Intervalo_Penultima_Ultima_Manutencao_dias": intervalo_dias if intervalo_dias is not None else "",
+            "Data_Proxima_Manutencao_SAP": sap_proxima.strftime("%Y-%m-%d") if sap_proxima is not None else "",
+            "Dias_Ultima_Manutencao_ate_SAP": dias_ult_ate_sap if dias_ult_ate_sap is not None else "",
+            "Dias_SAP_ate_Hoje": dias_sap_hoje if dias_sap_hoje is not None else "",
+            "Data_Proxima_Manutencao_ML": ml_dt.strftime("%Y-%m-%d") if ml_dt is not None else "",
+            "Diferenca_ML_vs_SAP_dias": dif_ml_sap if dif_ml_sap is not None else "",
+        })
+
+    df = pd.DataFrame(rows)
+    df.to_csv(output_path, index=False, encoding="utf-8")
+    print(f"  ✓ CSV consolidado salvo: {output_path} ({len(df)} equipamentos)")
+    return output_path
+
+
+def merge_componentes_pptx(output_path: str = "Apresentacoes_Componentes_Consolidado.pptx") -> str | None:
+    """
+    Concatena todos os PPTX 'IJ-*.pptx' em outputs/relatorios_mensais_componentes_ppt/
+    em um único arquivo, usando python-pptx para clonar slides com seus relacionamentos.
+    """
+    try:
+        from pptx import Presentation
+        from pptx.util import Emu
+        from copy import deepcopy
+    except ImportError:
+        print("  ⚠ python-pptx não disponível. Pulando consolidação de PPTX.")
+        return None
+
+    src_dir = Path("relatorios_mensais_componentes_ppt")
+    if not src_dir.exists():
+        print(f"  ⚠ Diretório {src_dir} não encontrado")
+        return None
+
+    pptx_files = sorted(src_dir.glob("IJ-*.pptx"))
+    if not pptx_files:
+        print(f"  ⚠ Nenhum PPTX 'IJ-*' em {src_dir}")
+        return None
+
+    base = Presentation(str(pptx_files[0]))
+    base_slide_w = base.slide_width
+    base_slide_h = base.slide_height
+
+    def _copy_slide(target_pres, src_slide):
+        blank_layout = target_pres.slide_layouts[6] if len(target_pres.slide_layouts) > 6 else target_pres.slide_layouts[-1]
+        new_slide = target_pres.slides.add_slide(blank_layout)
+        for shape in new_slide.shapes:
+            pass
+        for shp in list(new_slide.shapes):
+            sp = shp._element
+            sp.getparent().remove(sp)
+        for shp in src_slide.shapes:
+            el = shp.element
+            new_slide.shapes._spTree.insert_element_before(deepcopy(el), 'p:extLst')
+        for rel in src_slide.part.rels.values():
+            if "image" in rel.reltype or "chart" in rel.reltype or "media" in rel.reltype:
+                try:
+                    new_slide.part.relate_to(rel.target_part, rel.reltype)
+                except Exception:
+                    pass
+        return new_slide
+
+    for src_path in pptx_files[1:]:
+        try:
+            src = Presentation(str(src_path))
+            for slide in src.slides:
+                _copy_slide(base, slide)
+        except Exception as e:
+            print(f"  ⚠ Erro ao mesclar {src_path.name}: {e}")
+            continue
+
+    base.slide_width = base_slide_w
+    base.slide_height = base_slide_h
+    out = Path(output_path)
+    base.save(str(out))
+    print(f"  ✓ PPTX consolidado salvo: {out} ({len(pptx_files)} arquivos mesclados)")
+    return str(out)
 
 
 def load_equipment_stats() -> dict:
@@ -435,8 +641,14 @@ def load_equipment_stats() -> dict:
             if equip:
                 equip_data[equip] = {
                     "ultima_troca": item.get("data_ultima_manutencao"),
+                    "data_ultima_manutencao": item.get("data_ultima_manutencao"),
+                    "data_penultima_manutencao": item.get("data_penultima_manutencao"),
                     "penultima_troca": item.get("data_penultima_manutencao"),
                     "intervalo_dias": item.get("intervalo_manutencao_dias", 365),
+                    "intervalo_manutencao_dias": item.get("intervalo_manutencao_dias"),
+                    "media_dias_manutencao": item.get("media_dias_manutencao"),
+                    "min_dias_manutencao": item.get("min_dias_manutencao"),
+                    "max_dias_manutencao": item.get("max_dias_manutencao"),
                     "total_produzido": item.get("total_produzido", 0),
                     "total_refugado": item.get("total_refugado", 0),
                     "taxa_refugo_pct": item.get("taxa_refugo_pct", 0),
@@ -711,12 +923,12 @@ def generate_pdf_report(results: dict, output_path: str, inicio: str = None, fim
         "8. Dados Removidos da Análise",
         "9. Desempenho de Modelos",
         "10. Perguntas e Respostas",
-        "11. Previsão de Troca de Peças",
-        "12. Considerações",
-        "13. Próximos Passos",
-        "14. Recomendações",
-        "15. Considerações Finais",
-        "16. Análise Mensal por Equipamento",
+        "11. Prescrição de Troca de Peças",
+        "12. Análise Mensal por Equipamento",
+        "13. Considerações",
+        "14. Próximos Passos",
+        "15. Recomendações",
+        "16. Considerações Finais",
         "17. Consumo de Massa por Equipamento e Composto",
         "Referência Bibliográfica"
     ]
@@ -743,7 +955,7 @@ def generate_pdf_report(results: dict, output_path: str, inicio: str = None, fim
     necessidade de manutenção em extrusoras de borracha modelo Y125, utilizando dados
     coletados em ambiente industrial. A iniciativa surgiu da observação de que, durante as
     manutenções preventivas, diversos componentes demonstraram uma vida útil
-    significativamente maior que a inicialmente prevista pelo planejamento tradicional.
+    significativamente maior que a inicialmente prescrita pelo planejamento tradicional.
 
     Para viabilizar essa análise, foram coletados e organizados dados provenientes de
     múltiplos arquivos CSV, cada um associado a uma extrusora específica, contendo
@@ -787,7 +999,7 @@ def generate_pdf_report(results: dict, output_path: str, inicio: str = None, fim
     • <b>Análise Temporal:</b> Baseada em dias corridos desde o início da coleta de dados
     • <b>Análise de Produção:</b> Baseada na quantidade total de peças produzidas por período
     • <b>Análise de Desgaste:</b> Correlação entre volume de produção e indicadores de manutenção
-    • <b>Previsões:</b> Calculadas em função do número de peças produzidas e/ou dias de operação
+    • <b>Prescrições:</b> Calculadas em função do número de peças produzidas e/ou dias de operação
 
     Os gráficos apresentados podem utilizar diferentes unidades de medida conforme indicado em suas
     respectivas legendas: dias, meses ou quantidade de peças.
@@ -917,7 +1129,7 @@ def generate_pdf_report(results: dict, output_path: str, inicio: str = None, fim
 
     story.append(Paragraph("5.3 Random Forest", heading2_style))
     story.append(Paragraph(
-        "O Random Forest combina diversas Árvores de Decisão para tornar as previsões mais "
+        "O Random Forest combina diversas Árvores de Decisão para tornar as prescrições mais "
         "precisas e estáveis. Geralmente apresenta menor variância que uma única árvore, "
         "sendo mais robusto a ruídos e outliers.",
         body_style
@@ -937,9 +1149,9 @@ def generate_pdf_report(results: dict, output_path: str, inicio: str = None, fim
 
     story.append(Paragraph("6.1 Erro Quadrático Médio (EQM/MSE)", heading2_style))
     story.append(Paragraph(
-        "Mede a diferença entre os valores previstos pelo modelo e os valores reais, "
+        "Mede a diferença entre os valores prescritos pelo modelo e os valores reais, "
         "elevando essas diferenças ao quadrado. Quanto menor o EQM, mais precisas são "
-        "as previsões do modelo.",
+        "as prescrições do modelo.",
         body_style
     ))
 
@@ -953,7 +1165,7 @@ def generate_pdf_report(results: dict, output_path: str, inicio: str = None, fim
 
     story.append(Paragraph("6.3 Erro Absoluto Médio (EAM/MAE)", heading2_style))
     story.append(Paragraph(
-        "Mede a média das diferenças absolutas entre os valores previstos e os reais. "
+        "Mede a média das diferenças absolutas entre os valores prescritos e os reais. "
         "Ao contrário do EQM, não é tão sensível a erros extremos.",
         body_style
     ))
@@ -1070,25 +1282,43 @@ def generate_pdf_report(results: dict, output_path: str, inicio: str = None, fim
     if not equip_data:
         equip_data = VARIAVEIS_PIPELINE.get('troca_pecas_equipamentos', {}).get('equipamentos', {})
 
-    # Tabela com 3 colunas: Equipamento, Última Troca, Intervalo
-    table_data = [["Equipamento", "Última Troca", "Intervalo (dias)"]]
+    # Tabela: #, Equipamento, Penúltima Troca, Última Troca, Intervalo, Média/Mín/Máx por equipamento
+    table_data = [[
+        "#", "Equipamento", "Penúltima Troca", "Última Troca",
+        "Intervalo (dias)", "Média Hist. (dias)", "Mín (dias)", "Máx (dias)"
+    ]]
 
-    for equip, dados in sorted(equip_data.items()):
+    for idx, (equip, dados) in enumerate(sorted(equip_data.items()), start=1):
         if isinstance(dados, dict):
-            ultima = dados.get('ultima_troca', 'N/A')
-            intervalo = dados.get('intervalo_dias', 'N/A')
+            ultima = dados.get('ultima_troca') or dados.get('data_ultima_manutencao') or 'N/A'
+            penultima = dados.get('data_penultima_manutencao') or 'N/A'
+            intervalo = dados.get('intervalo_dias') or dados.get('intervalo_manutencao_dias') or 'N/A'
+            media = dados.get('media_dias_manutencao')
+            min_d = dados.get('min_dias_manutencao')
+            max_d = dados.get('max_dias_manutencao')
+            media_str = f"{media:.0f}" if isinstance(media, (int, float)) else 'N/A'
+            min_str = f"{min_d:.0f}" if isinstance(min_d, (int, float)) else 'N/A'
+            max_str = f"{max_d:.0f}" if isinstance(max_d, (int, float)) else 'N/A'
         else:
             ultima = dados
+            penultima = 'N/A'
             intervalo = 'N/A'
-        table_data.append([equip, ultima, str(intervalo)])
+            media_str = min_str = max_str = 'N/A'
+        table_data.append([
+            str(idx), equip, str(penultima), str(ultima),
+            str(intervalo), media_str, min_str, max_str
+        ])
 
-    equip_table = Table(table_data, colWidths=[3*cm, 3.5*cm, 3*cm])
+    equip_table = Table(
+        table_data,
+        colWidths=[1*cm, 2.5*cm, 2.5*cm, 2.5*cm, 2.2*cm, 2.5*cm, 1.8*cm, 1.8*cm]
+    )
     equip_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#F77F00')),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 9),
+        ('FONTSIZE', (0, 0), (-1, -1), 8),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
         ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#F5F5F5')),
         ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
@@ -1096,18 +1326,6 @@ def generate_pdf_report(results: dict, output_path: str, inicio: str = None, fim
     ]))
     story.append(equip_table)
     story.append(Spacer(1, 0.5*cm))
-
-    # Estatísticas de intervalo
-    intervalos = [d['intervalo_dias'] for d in equip_data.values() if isinstance(d, dict)]
-    if intervalos:
-        media_intervalo = sum(intervalos) / len(intervalos)
-        min_intervalo = min(intervalos)
-        max_intervalo = max(intervalos)
-        story.append(Paragraph(
-            f"<b>Estatísticas de Intervalo entre Trocas:</b><br/>"
-            f"Média: {media_intervalo:.0f} dias | Mínimo: {min_intervalo} dias | Máximo: {max_intervalo} dias",
-            body_style
-        ))
 
     # --- 7.5 RESUMO DAS FEATURES UTILIZADAS NO MODELO ---
     story.append(Paragraph("7.5 Features Utilizadas no Modelo Final", heading1_style))
@@ -1126,12 +1344,14 @@ def generate_pdf_report(results: dict, output_path: str, inicio: str = None, fim
 
         if features_originais:
             story.append(Paragraph(f"<b>Features Numéricas Originais ({len(features_originais)}):</b>", body_style))
-            story.append(Paragraph(", ".join(features_originais[:20]) + ("..." if len(features_originais) > 20 else ""), styles['Normal']))
+            for f in features_originais:
+                story.append(Paragraph(f"• {f}", styles['Normal']))
             story.append(Spacer(1, 0.3*cm))
 
         if features_acumuladas:
             story.append(Paragraph(f"<b>Features Acumuladas ({len(features_acumuladas)}):</b>", body_style))
-            story.append(Paragraph(", ".join(features_acumuladas), styles['Normal']))
+            for f in features_acumuladas:
+                story.append(Paragraph(f"• {f}", styles['Normal']))
             story.append(Spacer(1, 0.3*cm))
 
         if features_encoding:
@@ -1352,11 +1572,11 @@ def generate_pdf_report(results: dict, output_path: str, inicio: str = None, fim
         body_style
     ))
 
-    story.append(Paragraph("10.2 Qual a confiabilidade das previsões?", heading2_style))
+    story.append(Paragraph("10.2 Qual a confiabilidade das prescrições?", heading2_style))
     story.append(Paragraph(
         f"O modelo {model_name.upper()} apresentou R² de {r2:.4f}, o que significa que aproximadamente "
         f"{r2*100:.1f}% da variação nos dados é explicada pelo modelo. O erro médio absoluto (MAE) de "
-        f"{mae:.2f} indica a margem de erro típica das previsões.",
+        f"{mae:.2f} indica a margem de erro típica das prescrições.",
         body_style
     ))
 
@@ -1377,8 +1597,8 @@ def generate_pdf_report(results: dict, output_path: str, inicio: str = None, fim
     ))
     story.append(PageBreak())
 
-    # === 11. PREVISÃO DE TROCA DE PEÇAS ===
-    story.append(Paragraph("11. Previsão de Troca de Peças", heading1_style))
+    # === 11. PRESCRIÇÃO DE TROCA DE PEÇAS ===
+    story.append(Paragraph("11. Prescrição de Troca de Peças", heading1_style))
 
     # Carregar dados de equipamentos
     today = datetime.now()
@@ -1386,355 +1606,101 @@ def generate_pdf_report(results: dict, output_path: str, inicio: str = None, fim
     if not equip_data:
         equip_data = VARIAVEIS_PIPELINE.get('troca_pecas_equipamentos', {}).get('equipamentos', {})
 
-    # Obter previsões do modelo ML
-    ml_predictions = predict_maintenance_with_ml(equip_data)
-
-    # =====================================================
-    # TABELA 11.1 - PREVISÃO HISTÓRICA (baseada em intervalo)
-    # =====================================================
-    story.append(Paragraph("11.1 Previsão Histórica (Baseada em Intervalos)", heading2_style))
     story.append(Paragraph(
-        "Esta tabela apresenta a previsão baseada no <b>intervalo histórico</b> entre trocas de peças. "
-        "O cálculo é simples: Próxima Troca = Última Troca + Intervalo Médio Histórico. "
-        "É útil como referência, mas não considera o estado atual do equipamento.",
+        "Esta seção consolida, em um único arquivo CSV, a prescrição de manutenção por equipamento "
+        "combinando dados históricos, agendamento SAP (preventivas RM.195) e prescrição do modelo "
+        "de Machine Learning. As colunas do arquivo são: Equipamento, Última Data de Produção, "
+        "Última Manutenção, Intervalo entre Penúltima e Última Manutenção (dias), Data Próxima "
+        "Manutenção Agendada SAP, Dias da Última Manutenção até a Data SAP, Diferença entre Data "
+        "SAP e Hoje, Data Próxima Manutenção Prescrita pelo Machine Learning e Diferença em Dias "
+        "entre Data ML e Data SAP (sinal positivo: ML após SAP; negativo: ML antes do SAP).",
         body_style
     ))
     story.append(Spacer(1, 0.3*cm))
 
-    hist_data = [["Equipamento", "Última Troca", "Intervalo Hist.", "Próx. Troca", "Dias Restantes"]]
-
-    for equip, dados in sorted(equip_data.items()):
-        if isinstance(dados, dict):
-            ultima_str = dados.get('ultima_troca', None)
-            intervalo = dados.get('intervalo_dias', 365)
-        else:
-            ultima_str = dados
-            intervalo = 365
-
-        if ultima_str:
-            try:
-                ultima_date = datetime.strptime(ultima_str, '%Y-%m-%d')
-                proxima_date = ultima_date + timedelta(days=intervalo)
-                dias_restantes = (proxima_date - today).days
-
-                if dias_restantes < 0:
-                    status_hist = f"{dias_restantes} (ATRASADO)"
-                else:
-                    status_hist = f"{dias_restantes} dias"
-
-                proxima_str = proxima_date.strftime('%d/%m/%Y')
-                ultima_formatada = ultima_date.strftime('%d/%m/%Y')
-            except:
-                proxima_str = "N/A"
-                status_hist = "N/A"
-                ultima_formatada = ultima_str
-        else:
-            proxima_str = "N/A"
-            status_hist = "N/A"
-            ultima_formatada = "N/A"
-
-        hist_data.append([equip, ultima_formatada, f"{intervalo} dias", proxima_str, status_hist])
-
-    hist_table = Table(hist_data, colWidths=[2.3*cm, 2.5*cm, 2.5*cm, 2.5*cm, 3*cm])
-    hist_style = [
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#666666')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 7),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#F0F0F0')),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-    ]
-    # Colorir status atrasado
-    for i, row in enumerate(hist_data[1:], start=1):
-        if "ATRASADO" in str(row[-1]):
-            hist_style.append(('BACKGROUND', (4, i), (4, i), colors.HexColor('#FFCCCC')))
-
-    hist_table.setStyle(TableStyle(hist_style))
-    story.append(hist_table)
-    story.append(Spacer(1, 0.5*cm))
-
-    # =====================================================
-    # TABELA 11.2 - PREVISÃO PRESCRITIVA (baseada no modelo ML)
-    # =====================================================
-    story.append(Paragraph("11.2 Previsão Prescritiva (Modelo de Machine Learning)", heading2_style))
+    # --- Nota explicativa: por que algumas datas ML ficam ANTES da SAP ---
     story.append(Paragraph(
-        f"Esta tabela apresenta a previsão do <b>modelo {model_name.upper()}</b> (R² = {r2:.4f}), "
-        "que considera o <b>estado atual</b> de cada equipamento: produção acumulada, índice de desgaste, "
-        "taxa de refugo, medições de cilindro/fuso, entre outros fatores. "
-        "Esta é a <b>previsão recomendada</b> para tomada de decisão.",
+        "11.1 Por que algumas datas prescritas pelo ML são anteriores à data agendada pelo SAP?",
+        heading2_style
+    ))
+    story.append(Paragraph(
+        "Em parte dos equipamentos, a coluna <i>Diferença em Dias</i> aparece com sinal "
+        "<b>negativo</b> — ou seja, o modelo prescreve a próxima troca <b>antes</b> da data "
+        "agendada no SAP. Esse comportamento é <b>esperado</b> e indica justamente o ganho da "
+        "manutenção prescritiva sobre o calendário preventivo fixo. As três causas que "
+        "produzem essa antecipação são:",
+        body_style
+    ))
+    story.append(Paragraph(
+        "<b>1. Base de tempo diferente.</b> O SAP utiliza um intervalo fixo do plano "
+        "preventivo (~540 dias) replicado para todos os equipamentos. O ML utiliza como base "
+        "a <b>mediana dos dias em operação do próprio equipamento</b> nas trocas anteriores. "
+        "Equipamentos cujo histórico real mostra ciclos mais curtos que 540 dias (por exemplo "
+        "IJ-046 ≈ 343 dias, IJ-124 ≈ 332 dias, IJ-118 ≈ 385 dias) já partem de uma base menor — "
+        "o ML está respeitando o ritmo de desgaste observado, e não o intervalo agendado.",
+        body_style
+    ))
+    story.append(Paragraph(
+        "<b>2. Fator de consumo de massa.</b> A fórmula prescritiva inclui um fator multiplicativo "
+        "que compara o consumo de massa na janela atual (pós-última troca) com a mediana das "
+        "janelas anteriores. Quando o equipamento consumiu mais massa que o típico, o fator cai "
+        "(faixa de 0,70 a 1,30, com piso 0,70), encurtando o prazo prescrito em até 30%. "
+        "Interpretação: máquina trabalhou mais do que o usual ⇒ desgastou mais ⇒ próxima troca "
+        "deve ser antecipada.",
+        body_style
+    ))
+    story.append(Paragraph(
+        "<b>3. Fator de desgaste dimensional.</b> Quando a amplitude das medições de cilindro e "
+        "fuso na leitura mais recente excede a mediana histórica do equipamento, o fator de "
+        "desgaste também reduz o prazo (faixa de 0,60 a 1,20). Em equipamentos com leituras "
+        "estáveis o fator fica em 1,0 e não tem efeito; em equipamentos com sinais de degradação "
+        "dimensional, contribui adicionalmente para a antecipação.",
+        body_style
+    ))
+    story.append(Paragraph(
+        "Em resumo: o SAP responde à pergunta <i>\"quando o calendário diz para trocar?\"</i>; "
+        "o ML responde à pergunta <i>\"quando o equipamento, dado seu histórico real e sinais "
+        "atuais, indica que precisa trocar?\"</i>. Quando o ML prescreve uma data anterior à "
+        "do SAP, está sinalizando que o plano preventivo padrão é conservador <b>demais</b> "
+        "para aquele equipamento — situação em que aguardar a data SAP eleva o risco de falha "
+        "em operação. Quando o ML prescreve data posterior, indica o oposto: o equipamento "
+        "ainda tem margem operacional e a troca pode ser adiada com segurança, evitando "
+        "manutenção desnecessária.",
         body_style
     ))
     story.append(Spacer(1, 0.3*cm))
 
-    ml_data = [["Equipamento", "Última Troca", "Previsão ML", "Próx. Troca ML", "Status"]]
+    # Gerar CSV consolidado
+    csv_path = generate_previsao_manutencao_csv(equip_data)
+    csv_abs = Path(csv_path).resolve()
 
-    for equip, dados in sorted(equip_data.items()):
-        if isinstance(dados, dict):
-            ultima_str = dados.get('ultima_troca', None)
-            indice_desgaste = dados.get('indice_desgaste', 0)
-        else:
-            ultima_str = dados
-            indice_desgaste = 0
-
-        # Obter previsão ML
-        dias_ml = ml_predictions.get(equip, None)
-
-        if ultima_str:
-            try:
-                ultima_date = datetime.strptime(ultima_str, '%Y-%m-%d')
-                ultima_formatada = ultima_date.strftime('%d/%m/%Y')
-
-                if dias_ml is not None:
-                    proxima_ml_date = today + timedelta(days=dias_ml)
-                    proxima_ml_str = proxima_ml_date.strftime('%d/%m/%Y')
-
-                    # Determinar status baseado na previsão ML
-                    if dias_ml < 0:
-                        status_ml = "ATRASADO"
-                    elif dias_ml <= 30:
-                        status_ml = "URGENTE"
-                    elif dias_ml <= 90:
-                        status_ml = "ATENÇÃO"
-                    else:
-                        status_ml = "OK"
-
-                    previsao_ml_str = f"{dias_ml} dias"
-                else:
-                    proxima_ml_str = "N/A"
-                    status_ml = "N/A"
-                    previsao_ml_str = "N/A"
-            except:
-                ultima_formatada = ultima_str
-                proxima_ml_str = "N/A"
-                status_ml = "N/A"
-                previsao_ml_str = "N/A"
-        else:
-            ultima_formatada = "N/A"
-            proxima_ml_str = "N/A"
-            status_ml = "N/A"
-            previsao_ml_str = "N/A"
-
-        ml_data.append([equip, ultima_formatada, previsao_ml_str, proxima_ml_str, status_ml])
-
-    ml_table = Table(ml_data, colWidths=[2.3*cm, 2.5*cm, 2.5*cm, 2.8*cm, 2.2*cm])
-    ml_style = [
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#F77F00')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 7),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#FFF8F0')),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-    ]
-
-    # Colorir status
-    for i, row in enumerate(ml_data[1:], start=1):
-        status = row[-1]
-        if status == "ATRASADO":
-            ml_style.append(('BACKGROUND', (4, i), (4, i), colors.HexColor('#FF4444')))
-            ml_style.append(('TEXTCOLOR', (4, i), (4, i), colors.whitesmoke))
-        elif status == "URGENTE":
-            ml_style.append(('BACKGROUND', (4, i), (4, i), colors.HexColor('#FF8800')))
-            ml_style.append(('TEXTCOLOR', (4, i), (4, i), colors.whitesmoke))
-        elif status == "ATENÇÃO":
-            ml_style.append(('BACKGROUND', (4, i), (4, i), colors.HexColor('#FFCC00')))
-        elif status == "OK":
-            ml_style.append(('BACKGROUND', (4, i), (4, i), colors.HexColor('#44AA44')))
-            ml_style.append(('TEXTCOLOR', (4, i), (4, i), colors.whitesmoke))
-
-    ml_table.setStyle(TableStyle(ml_style))
-    story.append(ml_table)
-    story.append(Spacer(1, 0.5*cm))
-
-    # Legenda de status
-    story.append(Paragraph(
-        "<b>Legenda de Status:</b><br/>"
-        "• <font color='#FF4444'><b>ATRASADO</b></font>: Troca já deveria ter sido realizada<br/>"
-        "• <font color='#FF8800'><b>URGENTE</b></font>: Menos de 30 dias para a próxima troca<br/>"
-        "• <font color='#CCAA00'><b>ATENÇÃO</b></font>: Entre 30 e 90 dias para a próxima troca<br/>"
-        "• <font color='#44AA44'><b>OK</b></font>: Mais de 90 dias até a próxima troca",
-        body_style
-    ))
-    story.append(Spacer(1, 0.5*cm))
-
-    # =====================================================
-    # COMPARAÇÃO ENTRE MÉTODOS
-    # =====================================================
-    story.append(Paragraph("11.3 Comparação: Histórico vs. ML", heading2_style))
-    story.append(Paragraph(
-        "A tabela abaixo compara as duas abordagens, destacando a diferença entre a previsão histórica "
-        "(baseada apenas no intervalo entre trocas) e a previsão do modelo ML (que considera múltiplos fatores):",
-        body_style
-    ))
-    story.append(Spacer(1, 0.3*cm))
-
-    comp_data = [["Equipamento", "Previsão Histórica", "Previsão ML", "Diferença", "Recomendação"]]
-
-    for equip, dados in sorted(equip_data.items()):
-        if isinstance(dados, dict):
-            ultima_str = dados.get('ultima_troca', None)
-            intervalo_hist = dados.get('intervalo_dias', 365)
-        else:
-            ultima_str = dados
-            intervalo_hist = 365
-
-        dias_ml = ml_predictions.get(equip, None)
-
-        if ultima_str and dias_ml is not None:
-            try:
-                ultima_date = datetime.strptime(ultima_str, '%Y-%m-%d')
-                proxima_hist = ultima_date + timedelta(days=intervalo_hist)
-                dias_hist = (proxima_hist - today).days
-
-                diferenca = dias_ml - dias_hist
-
-                if diferenca < -30:
-                    recomendacao = "Antecipar"
-                elif diferenca > 30:
-                    recomendacao = "Pode adiar"
-                else:
-                    recomendacao = "Conforme"
-
-                if diferenca >= 0:
-                    diff_str = f"+{diferenca} dias"
-                else:
-                    diff_str = f"{diferenca} dias"
-
-                comp_data.append([
-                    equip,
-                    f"{dias_hist} dias",
-                    f"{dias_ml} dias",
-                    diff_str,
-                    recomendacao
-                ])
-            except:
-                pass
-
-    comp_table = Table(comp_data, colWidths=[2.3*cm, 2.8*cm, 2.5*cm, 2.5*cm, 2.5*cm])
-    comp_style = [
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#003366')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 7),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#F5F8FF')),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-    ]
-
-    # Colorir recomendações
-    for i, row in enumerate(comp_data[1:], start=1):
-        rec = row[-1]
-        if rec == "Antecipar":
-            comp_style.append(('BACKGROUND', (4, i), (4, i), colors.HexColor('#FF8800')))
-            comp_style.append(('TEXTCOLOR', (4, i), (4, i), colors.whitesmoke))
-        elif rec == "Pode adiar":
-            comp_style.append(('BACKGROUND', (4, i), (4, i), colors.HexColor('#44AA44')))
-            comp_style.append(('TEXTCOLOR', (4, i), (4, i), colors.whitesmoke))
-
-    comp_table.setStyle(TableStyle(comp_style))
-    story.append(comp_table)
-    story.append(Spacer(1, 0.5*cm))
+    # Gerar PPTX consolidado
+    pptx_abs = None
+    try:
+        pptx_path = merge_componentes_pptx()
+        if pptx_path:
+            pptx_abs = Path(pptx_path).resolve()
+    except Exception as e:
+        print(f"  ⚠ Falha na consolidação de PPTX: {e}")
 
     story.append(Paragraph(
-        "<b>Interpretação:</b><br/>"
-        "• <b>Antecipar</b>: O modelo ML indica que o equipamento pode precisar de manutenção antes do previsto pelo histórico<br/>"
-        "• <b>Pode adiar</b>: O modelo ML indica que o equipamento está em bom estado e pode operar mais tempo<br/>"
-        "• <b>Conforme</b>: Previsão ML próxima da histórica (diferença ≤ 30 dias)",
+        f"• <b>Arquivo CSV:</b> "
+        f"<link href='file://{csv_abs}' color='blue'><u>{csv_abs.name}</u></link>",
         body_style
     ))
-    story.append(Spacer(1, 0.5*cm))
-
-    story.append(Paragraph("11.4 Fatores Considerados pelo Modelo ML", heading2_style))
-    story.append(Paragraph(
-        f"O modelo de Machine Learning considera {total_features} variáveis para determinar a necessidade de troca de peças. "
-        "As principais são:",
-        body_style
-    ))
-    fatores_troca = [
-        "<b>Produção Acumulada</b>: Volume total de peças produzidas desde a última troca",
-        "<b>Índice de Desgaste</b>: Score combinado (0-100) baseado nas medições de cilindro e fuso",
-        "<b>Medições de Cilindro</b>: Variação, máximo e mínimo das medições do cilindro",
-        "<b>Medições de Fuso</b>: Variação, máximo e mínimo das medições do fuso",
-        "<b>Taxa de Refugo/Retrabalho</b>: Indicadores de qualidade acumulados",
-        "<b>Consumo de Massa</b>: Consumo de matéria-prima em relação à produção",
-        "<b>Taxa de Desgaste</b>: Desgaste por unidade de tempo ou produção",
-    ]
-    for fator in fatores_troca:
-        story.append(Paragraph(f"• {fator}", body_style))
+    if pptx_abs is not None:
+        story.append(Paragraph(
+            f"• <b>Apresentação consolidada (PPTX):</b> "
+            f"<link href='file://{pptx_abs}' color='blue'><u>{pptx_abs.name}</u></link>",
+            body_style
+        ))
 
     story.append(PageBreak())
 
-    # === 12. CONSIDERAÇÕES ===
-    story.append(Paragraph("12. Considerações", heading1_style))
-    story.append(Paragraph(
-        "O desenvolvimento de um projeto de manutenção prescritiva para injetoras de borracha "
-        "demonstrou o potencial de algoritmos de Machine Learning não apenas para prever o "
-        "momento ideal de manutenção, mas para prescrever intervenções específicas baseadas "
-        "nos padrões identificados.",
-        body_style
-    ))
-    story.append(Paragraph(
-        "O ensaio de diferentes algoritmos (Regressão Linear, Decision Tree, Random Forest e "
-        "XGBoost) evidenciou que modelos de ensemble tendem a produzir resultados superiores "
-        "quando há volume de dados adequado.",
-        body_style
-    ))
-    story.append(Spacer(1, 0.8*cm))
+    # NOTA: subitens 11.1 a 11.4 removidos — substituídos pelo CSV consolidado acima.
 
-    # === 13. PRÓXIMOS PASSOS ===
-    story.append(Paragraph("13. Próximos Passos", heading1_style))
-    proximos_passos = [
-        ("Shadow Teste", "Executar o modelo em operação paralela à linha produtiva, sem intervenções reais."),
-        ("Sistema de Recomendações", "Criar regras que traduzam resultados em recomendações de intervenção."),
-        ("Implantação em Produção", "Adoção gradativa começando por linha-piloto."),
-        ("Validação Contínua", "Incorporar dados recentes de forma recorrente."),
-        ("Incorporar Variáveis de Campo", "Incluir dados de temperatura, vibração e pressão."),
-    ]
-    for titulo, desc in proximos_passos:
-        story.append(Paragraph(f"<b>{titulo}:</b> {desc}", body_style))
-    story.append(Spacer(1, 0.8*cm))
-
-    # === 14. RECOMENDAÇÕES ===
-    story.append(Paragraph("14. Recomendações", heading1_style))
-    recomendacoes = [
-        "Desenvolvimento de Biblioteca de Recomendações Prescritivas",
-        "Plano Estruturado de Coleta e Qualidade de Dados",
-        "Cultura de manutenção baseada em dados",
-        "Integração com Sistemas de Produção",
-        "Pipelines de Teste e Retreinamento",
-        "Explorar Novos Modelos e Técnicas de Interpretação",
-        "Foco nos Benefícios Financeiros e Estratégicos",
-    ]
-    for rec in recomendacoes:
-        story.append(Paragraph(f"• {rec}", body_style))
-    story.append(PageBreak())
-
-    # === 15. CONSIDERAÇÕES FINAIS ===
-    story.append(Paragraph("15. Considerações Finais", heading1_style))
-    story.append(Paragraph(
-        f"Os resultados preliminares revelaram boas perspectivas para métodos como "
-        f"{model_name.upper()}. A incorporação de novas amostras tende a aumentar a precisão "
-        "das previsões, viabilizando uma manutenção realmente prescritiva, que não apenas "
-        "prevê quando intervir, mas também determina as ações específicas necessárias.",
-        body_style
-    ))
-    story.append(Paragraph(
-        "Como parâmetro de amostragem mínima, recomenda-se reunir ao menos 30 observações "
-        "para cada cenário relevante, sendo a faixa ideal entre 50 e 100 observações para "
-        "garantir maior robustez estatística.",
-        body_style
-    ))
-    story.append(Spacer(1, 1*cm))
-
-    # === 16. ANÁLISE MENSAL POR EQUIPAMENTO ===
-    story.append(Paragraph("16. Análise Mensal por Equipamento", heading1_style))
+    # === 12. ANÁLISE MENSAL POR EQUIPAMENTO ===
+    story.append(Paragraph("12. Análise Mensal por Equipamento", heading1_style))
 
     monthly_charts = results.get("monthly_charts", [])
     if monthly_charts:
@@ -1776,6 +1742,68 @@ def generate_pdf_report(results: dict, output_path: str, inicio: str = None, fim
             body_style
         ))
 
+    story.append(PageBreak())
+
+    # === 13. CONSIDERAÇÕES ===
+    story.append(Paragraph("13. Considerações", heading1_style))
+    story.append(Paragraph(
+        "O desenvolvimento de um projeto de manutenção prescritiva para injetoras de borracha "
+        "demonstrou o potencial de algoritmos de Machine Learning não apenas para prever o "
+        "momento ideal de manutenção, mas para prescrever intervenções específicas baseadas "
+        "nos padrões identificados.",
+        body_style
+    ))
+    story.append(Paragraph(
+        "O ensaio de diferentes algoritmos (Regressão Linear, Decision Tree, Random Forest e "
+        "XGBoost) evidenciou que modelos de ensemble tendem a produzir resultados superiores "
+        "quando há volume de dados adequado.",
+        body_style
+    ))
+    story.append(Spacer(1, 0.8*cm))
+
+    # === 14. PRÓXIMOS PASSOS ===
+    story.append(Paragraph("14. Próximos Passos", heading1_style))
+    proximos_passos = [
+        ("Shadow Teste", "Executar o modelo em operação paralela à linha produtiva, sem intervenções reais."),
+        ("Sistema de Recomendações", "Criar regras que traduzam resultados em recomendações de intervenção."),
+        ("Implantação em Produção", "Adoção gradativa começando por linha-piloto."),
+        ("Validação Contínua", "Incorporar dados recentes de forma recorrente."),
+        ("Incorporar Variáveis de Campo", "Incluir dados de temperatura, vibração e pressão."),
+    ]
+    for titulo, desc in proximos_passos:
+        story.append(Paragraph(f"<b>{titulo}:</b> {desc}", body_style))
+    story.append(Spacer(1, 0.8*cm))
+
+    # === 15. RECOMENDAÇÕES ===
+    story.append(Paragraph("15. Recomendações", heading1_style))
+    recomendacoes = [
+        "Desenvolvimento de Biblioteca de Recomendações Prescritivas",
+        "Plano Estruturado de Coleta e Qualidade de Dados",
+        "Cultura de manutenção baseada em dados",
+        "Integração com Sistemas de Produção",
+        "Pipelines de Teste e Retreinamento",
+        "Explorar Novos Modelos e Técnicas de Interpretação",
+        "Foco nos Benefícios Financeiros e Estratégicos",
+    ]
+    for rec in recomendacoes:
+        story.append(Paragraph(f"• {rec}", body_style))
+    story.append(PageBreak())
+
+    # === 16. CONSIDERAÇÕES FINAIS ===
+    story.append(Paragraph("16. Considerações Finais", heading1_style))
+    story.append(Paragraph(
+        f"Os resultados preliminares revelaram boas perspectivas para métodos como "
+        f"{model_name.upper()}. A incorporação de novas amostras tende a aumentar a precisão "
+        "das prescrições, viabilizando uma manutenção realmente prescritiva, que não apenas "
+        "prevê quando intervir, mas também determina as ações específicas necessárias.",
+        body_style
+    ))
+    story.append(Paragraph(
+        "Como parâmetro de amostragem mínima, recomenda-se reunir ao menos 30 observações "
+        "para cada cenário relevante, sendo a faixa ideal entre 50 e 100 observações para "
+        "garantir maior robustez estatística.",
+        body_style
+    ))
     story.append(PageBreak())
 
     # === 17. CONSUMO DE MASSA POR EQUIPAMENTO E COMPOSTO ===
@@ -2008,11 +2036,16 @@ SUMÁRIO
    7.3 Variáveis de Encoding (One-Hot)
    7.4 Histórico de Troca de Peças por Equipamento
    7.5 Features Utilizadas no Modelo Final
-8. Desempenho de Modelos
-9. Considerações
-10. Próximos Passos
-11. Recomendações
-12. Considerações Finais
+8. Dados Removidos da Análise
+9. Desempenho de Modelos
+10. Perguntas e Respostas
+11. Prescrição de Troca de Peças
+12. Análise Mensal por Equipamento
+13. Considerações
+14. Próximos Passos
+15. Recomendações
+16. Considerações Finais
+17. Consumo de Massa por Equipamento e Composto
 
 {'=' * 70}
 RESUMO

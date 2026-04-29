@@ -2,11 +2,13 @@
 Anexa o Capítulo 17 (Detalhamento das Fórmulas do Capítulo 11) ao final de
 qualquer PDF de relatório SABO.
 
-Importante: o conteúdo do Capítulo 17 é FIXO e referente ao snapshot do R21
-(modelo XGBoost, R² = 0,9538). Não é regenerado a partir do estado atual do
-pipeline — isto é intencional, para que mudanças de modelo em execuções
-futuras (ex.: XGBoost deixar de ser o melhor) não tornem o capítulo
-inconsistente.
+O conteúdo do Capítulo 17 é regenerado dinamicamente a partir do estado atual
+do pipeline:
+- Nome do modelo, R², MSE e MAE são lidos de outputs/evaluation_report.txt
+  (gerado por s05_evaluation.py).
+- A versão do relatório é inferida do nome do PDF de entrada (Relatorio_SABO_R<N>).
+Assim cada execução do pipeline produz um Capítulo 17 coerente com a última
+modelagem.
 
 Uso:
     python append_capitulo_17.py                    # Detecta o último Relatorio_SABO_R*.pdf e anexa in-place
@@ -54,8 +56,52 @@ def find_latest_report() -> Path:
     return candidates[-1][1]
 
 
-def build_chapter_17_pdf(output_path: Path) -> None:
-    """Gera um PDF contendo apenas o Capítulo 17."""
+def _load_latest_metrics() -> dict:
+    """
+    Lê outputs/evaluation_report.txt e devolve um dicionário com:
+      {model_name, r2, mse, mae}
+    Se o arquivo não existir ou não puder ser parseado, devolve fallback do R20.
+    """
+    fallback = {"model_name": "XGBoost", "r2": 0.9534, "mse": 1094.50, "mae": 20.02}
+    fp = OUTPUTS_DIR / "evaluation_report.txt"
+    if not fp.exists():
+        return fallback
+    try:
+        text = fp.read_text(encoding="utf-8")
+    except Exception:
+        return fallback
+
+    m_model = re.search(r"MELHOR MODELO SELECIONADO:\s*(\S+)", text)
+    m_r2 = re.search(r"R²[^:]*:\s*([0-9]+\.[0-9]+)", text)
+    m_mse = re.search(r"MSE[^:]*:\s*([0-9]+\.[0-9]+)", text)
+    m_mae = re.search(r"MAE[^:]*:\s*([0-9]+\.[0-9]+)", text)
+
+    if not (m_model and m_r2 and m_mse and m_mae):
+        return fallback
+
+    return {
+        "model_name": m_model.group(1).title(),
+        "r2": float(m_r2.group(1)),
+        "mse": float(m_mse.group(1)),
+        "mae": float(m_mae.group(1)),
+    }
+
+
+def _extract_report_version(pdf_path: Path | None) -> str | None:
+    """Extrai 'R<N>' do nome do arquivo Relatorio_SABO_R<N>.pdf, se aplicável."""
+    if pdf_path is None:
+        return None
+    m = re.search(r"Relatorio_SABO_(R\d+)", pdf_path.stem)
+    return m.group(1) if m else None
+
+
+def _fmt_pt(v: float, casas: int = 4) -> str:
+    """Formata número com vírgula decimal pt-BR."""
+    return f"{v:.{casas}f}".replace(".", ",")
+
+
+def build_chapter_17_pdf(output_path: Path, base_pdf: Path | None = None) -> None:
+    """Gera um PDF contendo apenas o Capítulo 17, com métricas dinâmicas."""
     doc = SimpleDocTemplate(
         str(output_path), pagesize=A4,
         leftMargin=2*cm, rightMargin=2*cm,
@@ -87,20 +133,28 @@ def build_chapter_17_pdf(output_path: Path) -> None:
         borderPadding=8,
     )
 
+    metrics = _load_latest_metrics()
+    versao = _extract_report_version(base_pdf) or "atual"
+    model_label = metrics["model_name"]
+    r2_str = _fmt_pt(metrics["r2"], 4)
+    mse_str = _fmt_pt(metrics["mse"], 2)
+    mae_str = _fmt_pt(metrics["mae"], 2)
+
     story = []
 
     story.append(Paragraph("17. Detalhamento das Fórmulas do Capítulo 11", heading1_style))
     story.append(Paragraph(
         "Esta seção complementa o Capítulo 11 detalhando, em linguagem descritiva, todas as "
-        "fórmulas usadas para gerar as previsões de troca de peças. <b>Conteúdo fixo, baseado no "
-        "snapshot do Relatório R20 (modelo XGBoost, R² = 0,9534, MSE = 1094,50, MAE = 20,02).</b> "
+        "fórmulas usadas para gerar as prescrições de troca de peças. <b>Conteúdo gerado a partir "
+        f"do snapshot do Relatório {versao} (modelo {model_label}, R² = {r2_str}, "
+        f"MSE = {mse_str}, MAE = {mae_str}).</b> "
         "Cada fórmula é apresentada com seu propósito, descrição em linguagem natural e exemplo "
-        "numérico baseado nos dados reais daquele relatório.",
+        "numérico ilustrativo.",
         body_style
     ))
 
     # ---------- 17.1 ----------
-    story.append(Paragraph("17.1 Fórmulas da Previsão Histórica (referente a 11.1)", heading2_style))
+    story.append(Paragraph("17.1 Fórmulas da Prescrição Histórica (referente a 11.1)", heading2_style))
     story.append(Paragraph(
         "<b>Para que serve:</b> Estimar a próxima troca usando apenas o histórico de intervalos "
         "entre trocas anteriores, sem considerar o estado atual do equipamento. Funciona como "
@@ -108,9 +162,9 @@ def build_chapter_17_pdf(output_path: Path) -> None:
         body_style
     ))
 
-    story.append(Paragraph("<b>Fórmula 1 — Data prevista da próxima troca</b>", body_style))
+    story.append(Paragraph("<b>Fórmula 1 — Data prescrita da próxima troca</b>", body_style))
     story.append(Paragraph(
-        "Data Prevista da Próxima Troca é igual à Data da Última Troca já realizada no equipamento, "
+        "Data Prescrita da Próxima Troca é igual à Data da Última Troca já realizada no equipamento, "
         "somada ao Intervalo Médio Histórico em dias (a média de dias entre as trocas anteriores "
         "daquele mesmo equipamento).",
         formula_style
@@ -118,7 +172,7 @@ def build_chapter_17_pdf(output_path: Path) -> None:
 
     story.append(Paragraph("<b>Fórmula 2 — Quantos dias ainda faltam</b>", body_style))
     story.append(Paragraph(
-        "Dias Restantes até a Próxima Troca é igual à diferença entre a Data Prevista da Próxima "
+        "Dias Restantes até a Próxima Troca é igual à diferença entre a Data Prescrita da Próxima "
         "Troca (Fórmula 1) e a Data de Hoje, expressa em número inteiro de dias. Quando o "
         "resultado é negativo, o equipamento está em situação de ATRASADO.",
         formula_style
@@ -145,17 +199,17 @@ def build_chapter_17_pdf(output_path: Path) -> None:
     story.append(PageBreak())
 
     # ---------- 17.2 ----------
-    story.append(Paragraph("17.2 Fórmulas da Previsão Prescritiva — Modelo ML (referente a 11.2)", heading2_style))
+    story.append(Paragraph("17.2 Fórmulas da Prescrição via Modelo ML (referente a 11.2)", heading2_style))
     story.append(Paragraph(
-        "<b>Para que serve:</b> Prever a próxima troca usando o modelo XGBoost (R² = 0,9534) "
-        "treinado sobre o histórico de operação. Considera o estado atual do equipamento — "
-        "produção acumulada, desgastes, refugo, medições de cilindro e fuso.",
+        f"<b>Para que serve:</b> Prescrever a próxima troca usando o modelo {model_label} "
+        f"(R² = {r2_str}) treinado sobre o histórico de operação. Considera o estado atual do "
+        "equipamento — produção acumulada, desgastes, refugo, medições de cilindro e fuso.",
         body_style
     ))
 
-    story.append(Paragraph("<b>Fórmula 3 — Dias previstos pelo modelo</b>", body_style))
+    story.append(Paragraph("<b>Fórmula 3 — Dias prescritos pelo modelo</b>", body_style))
     story.append(Paragraph(
-        "Dias Previstos pelo Modelo ML é o valor numérico devolvido pelo modelo XGBoost quando "
+        f"Dias Prescritos pelo Modelo ML é o valor numérico devolvido pelo modelo {model_label} quando "
         "recebe como entrada o último estado conhecido do equipamento (último registro disponível "
         "no arquivo data_eda.csv, contendo as 22 variáveis usadas no treinamento). O modelo "
         "aprendeu, durante o treino, a relação entre essas variáveis e o número de dias até a "
@@ -163,29 +217,29 @@ def build_chapter_17_pdf(output_path: Path) -> None:
         formula_style
     ))
 
-    story.append(Paragraph("<b>Fórmula 4 — Data prevista pelo modelo</b>", body_style))
+    story.append(Paragraph("<b>Fórmula 4 — Data prescrita pelo modelo</b>", body_style))
     story.append(Paragraph(
-        "Data Prevista da Próxima Troca pelo Modelo é igual à Data de Hoje somada ao número de "
-        "Dias Previstos pelo Modelo ML (Fórmula 3).",
+        "Data Prescrita da Próxima Troca pelo Modelo é igual à Data de Hoje somada ao número de "
+        "Dias Prescritos pelo Modelo ML (Fórmula 3).",
         formula_style
     ))
 
     story.append(Paragraph("<b>Fórmula 5 — Classificação de status</b>", body_style))
     story.append(Paragraph(
-        "Se o número de dias previstos é <b>menor que zero</b>, o status é <b>ATRASADO</b> "
+        "Se o número de dias prescritos é <b>menor que zero</b>, o status é <b>ATRASADO</b> "
         "(a troca já deveria ter ocorrido).<br/>"
-        "Se o número de dias previstos é <b>igual ou menor que 30</b>, o status é "
+        "Se o número de dias prescritos é <b>igual ou menor que 30</b>, o status é "
         "<b>URGENTE</b> (resta menos de um mês).<br/>"
-        "Se o número de dias previstos é <b>maior que 30 e menor ou igual a 90</b>, o status é "
+        "Se o número de dias prescritos é <b>maior que 30 e menor ou igual a 90</b>, o status é "
         "<b>ATENÇÃO</b> (entre um e três meses).<br/>"
-        "Se o número de dias previstos é <b>maior que 90</b>, o status é <b>OK</b> (mais de três "
+        "Se o número de dias prescritos é <b>maior que 90</b>, o status é <b>OK</b> (mais de três "
         "meses de margem).",
         formula_style
     ))
 
     story.append(Paragraph("<b>Exemplo numérico — Equipamento IJ-119 (URGENTE):</b>", body_style))
     story.append(Paragraph(
-        "O modelo XGBoost analisou o último registro do IJ-119 e devolveu <b>3 dias</b>.<br/>"
+        f"O modelo {model_label} analisou o último registro do IJ-119 e devolveu <b>3 dias</b>.<br/>"
         "Aplicando a Fórmula 4: 14/04/2026 mais 3 dias dá <b>17/04/2026</b>.<br/>"
         "Aplicando a Fórmula 5: 3 dias está entre 0 e 30 → status <b>URGENTE</b>.",
         body_style
@@ -220,9 +274,9 @@ def build_chapter_17_pdf(output_path: Path) -> None:
 
     story.append(Paragraph("<b>Fórmula 6 — Diferença entre os dois métodos</b>", body_style))
     story.append(Paragraph(
-        "Diferença em Dias é igual ao número de Dias Previstos pelo Modelo ML (Fórmula 3) menos "
+        "Diferença em Dias é igual ao número de Dias Prescritos pelo Modelo ML (Fórmula 3) menos "
         "o número de Dias Restantes pelo Histórico (Fórmula 2). Resultado positivo significa "
-        "que o modelo prevê mais tempo de operação que o histórico; negativo, o oposto.",
+        "que o modelo prescreve mais tempo de operação que o histórico; negativo, o oposto.",
         formula_style
     ))
 
@@ -239,7 +293,7 @@ def build_chapter_17_pdf(output_path: Path) -> None:
 
     story.append(Paragraph("<b>Exemplo numérico — Equipamento IJ-046 (Pode adiar):</b>", body_style))
     story.append(Paragraph(
-        "Dias Previstos pelo Modelo ML = 18; Dias Restantes pelo Histórico = −122.<br/>"
+        "Dias Prescritos pelo Modelo ML = 18; Dias Restantes pelo Histórico = −122.<br/>"
         "Aplicando a Fórmula 6: 18 menos (−122) dá <b>+140 dias</b> de diferença.<br/>"
         "Aplicando a Fórmula 7: +140 é maior que +30 → recomendação <b>Pode adiar</b>.<br/>"
         "<i>Interpretação: o histórico marcaria o IJ-046 como atrasado, mas o modelo, ao analisar "
@@ -249,7 +303,7 @@ def build_chapter_17_pdf(output_path: Path) -> None:
 
     story.append(Paragraph("<b>Exemplo numérico — Equipamento IJ-134 (Conforme):</b>", body_style))
     story.append(Paragraph(
-        "Dias Previstos pelo Modelo ML = 301; Dias Restantes pelo Histórico = 272.<br/>"
+        "Dias Prescritos pelo Modelo ML = 301; Dias Restantes pelo Histórico = 272.<br/>"
         "Aplicando a Fórmula 6: 301 menos 272 dá <b>+29 dias</b> de diferença.<br/>"
         "Aplicando a Fórmula 7: +29 está entre −30 e +30 → recomendação <b>Conforme</b>.",
         body_style
@@ -443,7 +497,7 @@ def main() -> int:
 
     with tempfile.TemporaryDirectory() as tmp:
         cap17_pdf = Path(tmp) / "_cap17.pdf"
-        build_chapter_17_pdf(cap17_pdf)
+        build_chapter_17_pdf(cap17_pdf, base_pdf=input_pdf)
 
         # Mesclar para um arquivo temporário primeiro (caso input == output)
         merged_tmp = Path(tmp) / "_merged.pdf"
