@@ -342,13 +342,13 @@ def predict_maintenance_with_ml(equip_data: dict) -> dict:
         model_path = Path("models/best_model.joblib")
 
     if not model_path.exists():
-        print("  ⚠ Modelo ML não encontrado. Previsões ML indisponíveis.")
+        print("  ⚠ Modelo ML não encontrado. Prescrições ML indisponíveis.")
         return predictions
 
     # Carregar dados de treino para obter nomes das features
     train_data_path = Path("train_test_split.npz")
     if not train_data_path.exists():
-        print("  ⚠ Dados de treino não encontrados. Previsões ML indisponíveis.")
+        print("  ⚠ Dados de treino não encontrados. Prescrições ML indisponíveis.")
         return predictions
 
     try:
@@ -365,7 +365,7 @@ def predict_maintenance_with_ml(equip_data: dict) -> dict:
         # Carregar dados EDA para obter último registro de cada equipamento
         eda_path = Path("data_eda.csv")
         if not eda_path.exists():
-            print("  ⚠ data_eda.csv não encontrado. Previsões ML indisponíveis.")
+            print("  ⚠ data_eda.csv não encontrado. Prescrições ML indisponíveis.")
             return predictions
 
         df_eda = pd.read_csv(eda_path)
@@ -402,10 +402,10 @@ def predict_maintenance_with_ml(equip_data: dict) -> dict:
                     # Garantir valor positivo e arredondar
                     predictions[equip] = max(0, int(round(pred)))
 
-        print(f"  ✓ Previsões ML geradas para {len(predictions)} equipamentos")
+        print(f"  ✓ Prescrições ML geradas para {len(predictions)} equipamentos")
 
     except Exception as e:
-        print(f"  ⚠ Erro ao gerar previsões ML: {e}")
+        print(f"  ⚠ Erro ao gerar prescrições ML: {e}")
 
     return predictions
 
@@ -489,7 +489,7 @@ def _load_last_production_dates() -> dict:
 
 def generate_previsao_manutencao_csv(equip_data: dict, output_path: str = "previsao_manutencao_consolidada.csv") -> str:
     """
-    Gera CSV consolidado de previsão de manutenção por equipamento.
+    Gera CSV consolidado de prescrição de manutenção por equipamento.
 
     Colunas:
       Equipamento, Ultima_Data_Producao, Ultima_Manutencao,
@@ -923,7 +923,7 @@ def generate_pdf_report(results: dict, output_path: str, inicio: str = None, fim
         "8. Dados Removidos da Análise",
         "9. Desempenho de Modelos",
         "10. Perguntas e Respostas",
-        "11. Previsão de Troca de Peças",
+        "11. Prescrição de Troca de Peças",
         "12. Análise Mensal por Equipamento",
         "13. Considerações",
         "14. Próximos Passos",
@@ -955,7 +955,7 @@ def generate_pdf_report(results: dict, output_path: str, inicio: str = None, fim
     necessidade de manutenção em extrusoras de borracha modelo Y125, utilizando dados
     coletados em ambiente industrial. A iniciativa surgiu da observação de que, durante as
     manutenções preventivas, diversos componentes demonstraram uma vida útil
-    significativamente maior que a inicialmente prevista pelo planejamento tradicional.
+    significativamente maior que a inicialmente prescrita pelo planejamento tradicional.
 
     Para viabilizar essa análise, foram coletados e organizados dados provenientes de
     múltiplos arquivos CSV, cada um associado a uma extrusora específica, contendo
@@ -999,7 +999,7 @@ def generate_pdf_report(results: dict, output_path: str, inicio: str = None, fim
     • <b>Análise Temporal:</b> Baseada em dias corridos desde o início da coleta de dados
     • <b>Análise de Produção:</b> Baseada na quantidade total de peças produzidas por período
     • <b>Análise de Desgaste:</b> Correlação entre volume de produção e indicadores de manutenção
-    • <b>Previsões:</b> Calculadas em função do número de peças produzidas e/ou dias de operação
+    • <b>Prescrições:</b> Calculadas em função do número de peças produzidas e/ou dias de operação
 
     Os gráficos apresentados podem utilizar diferentes unidades de medida conforme indicado em suas
     respectivas legendas: dias, meses ou quantidade de peças.
@@ -1129,7 +1129,7 @@ def generate_pdf_report(results: dict, output_path: str, inicio: str = None, fim
 
     story.append(Paragraph("5.3 Random Forest", heading2_style))
     story.append(Paragraph(
-        "O Random Forest combina diversas Árvores de Decisão para tornar as previsões mais "
+        "O Random Forest combina diversas Árvores de Decisão para tornar as prescrições mais "
         "precisas e estáveis. Geralmente apresenta menor variância que uma única árvore, "
         "sendo mais robusto a ruídos e outliers.",
         body_style
@@ -1149,9 +1149,9 @@ def generate_pdf_report(results: dict, output_path: str, inicio: str = None, fim
 
     story.append(Paragraph("6.1 Erro Quadrático Médio (EQM/MSE)", heading2_style))
     story.append(Paragraph(
-        "Mede a diferença entre os valores previstos pelo modelo e os valores reais, "
+        "Mede a diferença entre os valores prescritos pelo modelo e os valores reais, "
         "elevando essas diferenças ao quadrado. Quanto menor o EQM, mais precisas são "
-        "as previsões do modelo.",
+        "as prescrições do modelo.",
         body_style
     ))
 
@@ -1165,7 +1165,7 @@ def generate_pdf_report(results: dict, output_path: str, inicio: str = None, fim
 
     story.append(Paragraph("6.3 Erro Absoluto Médio (EAM/MAE)", heading2_style))
     story.append(Paragraph(
-        "Mede a média das diferenças absolutas entre os valores previstos e os reais. "
+        "Mede a média das diferenças absolutas entre os valores prescritos e os reais. "
         "Ao contrário do EQM, não é tão sensível a erros extremos.",
         body_style
     ))
@@ -1572,11 +1572,11 @@ def generate_pdf_report(results: dict, output_path: str, inicio: str = None, fim
         body_style
     ))
 
-    story.append(Paragraph("10.2 Qual a confiabilidade das previsões?", heading2_style))
+    story.append(Paragraph("10.2 Qual a confiabilidade das prescrições?", heading2_style))
     story.append(Paragraph(
         f"O modelo {model_name.upper()} apresentou R² de {r2:.4f}, o que significa que aproximadamente "
         f"{r2*100:.1f}% da variação nos dados é explicada pelo modelo. O erro médio absoluto (MAE) de "
-        f"{mae:.2f} indica a margem de erro típica das previsões.",
+        f"{mae:.2f} indica a margem de erro típica das prescrições.",
         body_style
     ))
 
@@ -1597,8 +1597,8 @@ def generate_pdf_report(results: dict, output_path: str, inicio: str = None, fim
     ))
     story.append(PageBreak())
 
-    # === 11. PREVISÃO DE TROCA DE PEÇAS ===
-    story.append(Paragraph("11. Previsão de Troca de Peças", heading1_style))
+    # === 11. PRESCRIÇÃO DE TROCA DE PEÇAS ===
+    story.append(Paragraph("11. Prescrição de Troca de Peças", heading1_style))
 
     # Carregar dados de equipamentos
     today = datetime.now()
@@ -1607,13 +1607,65 @@ def generate_pdf_report(results: dict, output_path: str, inicio: str = None, fim
         equip_data = VARIAVEIS_PIPELINE.get('troca_pecas_equipamentos', {}).get('equipamentos', {})
 
     story.append(Paragraph(
-        "Esta seção consolida, em um único arquivo CSV, a previsão de manutenção por equipamento "
+        "Esta seção consolida, em um único arquivo CSV, a prescrição de manutenção por equipamento "
         "combinando dados históricos, agendamento SAP (preventivas RM.195) e prescrição do modelo "
         "de Machine Learning. As colunas do arquivo são: Equipamento, Última Data de Produção, "
         "Última Manutenção, Intervalo entre Penúltima e Última Manutenção (dias), Data Próxima "
         "Manutenção Agendada SAP, Dias da Última Manutenção até a Data SAP, Diferença entre Data "
         "SAP e Hoje, Data Próxima Manutenção Prescrita pelo Machine Learning e Diferença em Dias "
         "entre Data ML e Data SAP (sinal positivo: ML após SAP; negativo: ML antes do SAP).",
+        body_style
+    ))
+    story.append(Spacer(1, 0.3*cm))
+
+    # --- Nota explicativa: por que algumas datas ML ficam ANTES da SAP ---
+    story.append(Paragraph(
+        "11.1 Por que algumas datas prescritas pelo ML são anteriores à data agendada pelo SAP?",
+        heading2_style
+    ))
+    story.append(Paragraph(
+        "Em parte dos equipamentos, a coluna <i>Diferença em Dias</i> aparece com sinal "
+        "<b>negativo</b> — ou seja, o modelo prescreve a próxima troca <b>antes</b> da data "
+        "agendada no SAP. Esse comportamento é <b>esperado</b> e indica justamente o ganho da "
+        "manutenção prescritiva sobre o calendário preventivo fixo. As três causas que "
+        "produzem essa antecipação são:",
+        body_style
+    ))
+    story.append(Paragraph(
+        "<b>1. Base de tempo diferente.</b> O SAP utiliza um intervalo fixo do plano "
+        "preventivo (~540 dias) replicado para todos os equipamentos. O ML utiliza como base "
+        "a <b>mediana dos dias em operação do próprio equipamento</b> nas trocas anteriores. "
+        "Equipamentos cujo histórico real mostra ciclos mais curtos que 540 dias (por exemplo "
+        "IJ-046 ≈ 343 dias, IJ-124 ≈ 332 dias, IJ-118 ≈ 385 dias) já partem de uma base menor — "
+        "o ML está respeitando o ritmo de desgaste observado, e não o intervalo agendado.",
+        body_style
+    ))
+    story.append(Paragraph(
+        "<b>2. Fator de consumo de massa.</b> A fórmula prescritiva inclui um fator multiplicativo "
+        "que compara o consumo de massa na janela atual (pós-última troca) com a mediana das "
+        "janelas anteriores. Quando o equipamento consumiu mais massa que o típico, o fator cai "
+        "(faixa de 0,70 a 1,30, com piso 0,70), encurtando o prazo prescrito em até 30%. "
+        "Interpretação: máquina trabalhou mais do que o usual ⇒ desgastou mais ⇒ próxima troca "
+        "deve ser antecipada.",
+        body_style
+    ))
+    story.append(Paragraph(
+        "<b>3. Fator de desgaste dimensional.</b> Quando a amplitude das medições de cilindro e "
+        "fuso na leitura mais recente excede a mediana histórica do equipamento, o fator de "
+        "desgaste também reduz o prazo (faixa de 0,60 a 1,20). Em equipamentos com leituras "
+        "estáveis o fator fica em 1,0 e não tem efeito; em equipamentos com sinais de degradação "
+        "dimensional, contribui adicionalmente para a antecipação.",
+        body_style
+    ))
+    story.append(Paragraph(
+        "Em resumo: o SAP responde à pergunta <i>\"quando o calendário diz para trocar?\"</i>; "
+        "o ML responde à pergunta <i>\"quando o equipamento, dado seu histórico real e sinais "
+        "atuais, indica que precisa trocar?\"</i>. Quando o ML prescreve uma data anterior à "
+        "do SAP, está sinalizando que o plano preventivo padrão é conservador <b>demais</b> "
+        "para aquele equipamento — situação em que aguardar a data SAP eleva o risco de falha "
+        "em operação. Quando o ML prescreve data posterior, indica o oposto: o equipamento "
+        "ainda tem margem operacional e a troca pode ser adiada com segurança, evitando "
+        "manutenção desnecessária.",
         body_style
     ))
     story.append(Spacer(1, 0.3*cm))
@@ -1742,7 +1794,7 @@ def generate_pdf_report(results: dict, output_path: str, inicio: str = None, fim
     story.append(Paragraph(
         f"Os resultados preliminares revelaram boas perspectivas para métodos como "
         f"{model_name.upper()}. A incorporação de novas amostras tende a aumentar a precisão "
-        "das previsões, viabilizando uma manutenção realmente prescritiva, que não apenas "
+        "das prescrições, viabilizando uma manutenção realmente prescritiva, que não apenas "
         "prevê quando intervir, mas também determina as ações específicas necessárias.",
         body_style
     ))
@@ -1987,7 +2039,7 @@ SUMÁRIO
 8. Dados Removidos da Análise
 9. Desempenho de Modelos
 10. Perguntas e Respostas
-11. Previsão de Troca de Peças
+11. Prescrição de Troca de Peças
 12. Análise Mensal por Equipamento
 13. Considerações
 14. Próximos Passos
